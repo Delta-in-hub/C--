@@ -1,0 +1,13 @@
+Language:      Cpp
+BasedOnStyle: Microsoft
+TabWidth: 4
+UseTab: Never
+IndentWidth: 4
+ColumnLimit: 120
+PointerAlignment: Left
+AlignConsecutiveAssignments: true
+AlignConsecutiveMacros: true
+IndentPPDirectives: BeforeHash
+SortIncludes: true
+SortUsingDeclarations: true
+Standard: c++14
