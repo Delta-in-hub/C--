@@ -7,8 +7,8 @@ int main(void)
 {
     /*
     char* str;
-    string st = "����Ĵ��ˡ�";
-    char* path = "in.txt";
+    string st = "???????��????";
+    const char* path = "in.txt";
     str = openFile(path);
     errorToken(str, str + 10, str+11, path, st);
     getchar();

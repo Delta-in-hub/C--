@@ -182,7 +182,7 @@ char* openFile(const char* path)
     return buf;
 }
 
-void errorToken(char* buf, char* start, char* end, char* path, std::string msg)
+void errorToken(char* buf, char* start, char* end, const char* path, std::string msg)
 {
     char* s  = buf;
     int line = 0, col = 0;

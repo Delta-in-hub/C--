@@ -6,6 +6,7 @@
             "command": "D:\\TDM-GCC-64\\bin\\g++.exe",
             "args": [
                 "-g",
+                // "${fileDirname}\\token.cpp ${fileDirname}\\main.cpp",
                 "*.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
