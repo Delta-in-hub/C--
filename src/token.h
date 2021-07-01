@@ -67,17 +67,102 @@ enum
 "+=", "-=", "<<=", ">>=", "&=", "^=", "|=")
 */
 
-static const std::unordered_map<std::string, std::string> tokenType{
-    {"num", "TK_NUM"},
-    {"dnum", "TK_DNUM"},
+static inline const std::unordered_map<std::string, std::string> tokenType{
+
+    {"typedef", "TK_TYPEDEF"},
+    {"extern", "TK_EXTERN"},
+    {"static", "TK_STATIC"},
+    {"auto", "TK_AUTO"},
+    {"register", "TK_REGISTER"},
+    {"void", "TK_VOID"},
+    {"char", "TK_CHAR"},
+    {"short", "TK_SHORT"},
     {"int", "TK_INT"},
-    {"==", "TK_EQ"},
+    {"long", "TK_LONG"},
+    {"float", "TK_FLOAT"},
+    {"double", "TK_DOUBLE"},
+    {"signed", "TK_SIGNED"},
+    {"unsigned", "TK_UNSIGNED"},
+    {"_Bool", "TK_B00L"},
+    {"_Complex", "TK_COMPLEX"},
+    {"_Imaginary", "TK_IMAGINARY"},
+    {"struct", "TK_STRUCT"},
+    {"union", "TK_UNION"},
+    {"const", "TK_CONST"},
+    {"restrict", "TK_RESTRICT"},
+    {"volatile", "TK_VOLATILE"},
+    {"sizeof", "TK_SIZEOF"},
+    {"enum", "TK_ENUM"},
+    {"inline", "TK_INLINE"},
+    {"case", "TK_CASE"},
+    {"default", "TK_DEFAULT"},
+    {"if", "TK_IF"},
+    {"else", "TK_ELSE"},
+    {"switch", "TK_SWITCH"},
+    {"while", "TK_WHILE"},
+    {"do", "TK_DO"},
+    {"for", "TK_FOR"},
+    {"goto", "TK_GOTO"},
+    {"break", "TK_BREAK"},
+    {"return", "TK_RETURN"},
+    {"{", "TK_{"},
+    {"}", "TK_}"},
+    {";", "TK_;"},
+    {",", "TK_,"},
+    {":", "TK_:"},
+    {"*", "TK_*"},
+    {"(", "TK_("},
+    {")", "TK_)"},
+    {"[", "TK_["},
+    {"]", "TK_]"},
+    {"?", "TK_?"},
+    {"||", "TK_||"},
+    {"&&", "TK_&&"},
+    {"|", "TK_|"},
+    {"^", "TK_^"},
+    {"&", "TK_&"},
+    {"==", "TK_=="},
+    {"!=", "TK_!="},
+    {"<", "TK_<"},
+    {">", "TK_>"},
+    {"<=", "TK_<="},
+    {">=", "TK_>="},
+    {"<<", "TK_<<"},
+    {">>", "TK_>>"},
+    {"+", "TK_+"},
+    {"-", "TK_-"},
+    {"/", "TK_/"},
+    {"%", "TK_%"},
+    {"++", "TK_++"},
+    {"--", "TK_--"},
+    {".", "TK_."},
+    {"->", "TK_->"},
+    {"...", "TK_..."},
+    {"=", "TK_="},
+    {"~", "TK_~"},
+    {"!", "TK_!"},
+    {"*=", "TK_*="},
+    {"/=", "TK_/="},
+    {"%=", "TK_%="},
+    {"+=", "TK_+="},
+    {"-=", "TK_-="},
+    {"<<=", "TK_<<="},
+    {">>=", "TK_>>="},
+    {"&=", "TK_&="},
+    {"^=", "TK_^="},
+    {"|=", "TK_|="}
+
 };
 
 //关键字表
-static const std::unordered_set<std::string> keywords{};
+static inline const std::unordered_set<std::string> keywords{"typedef","extern","static","auto","register","void","char","short","int",
+"long","float","double","signed","unsigned","_Bool","_Complex","_Imaginary","struct","union","const","restrict","volatile","sizeof","enum","inline","case","default",
+"if","else","switch","while","do","for","goto","continue","break","return"};
 //符号表
-static const std::unordered_set<std::string> symbols{};
+static inline const std::unordered_set<std::string> symbols{
+    "{" , "}" , ";" , "," , ":" , "*" , "(" , ")" , "[" , "]" , "?",   "||", "&&",   "|",    "^",   "&" ,
+    "==",  "!=",  "<",    ">",    "<=",  ">=",  "<<",   ">>",   "+" , "-" , "/",   "%",  "++" , "--" , "." , "->",
+    "...", "=" , "~",    "!",    "*=",  "/=",  "%=",   "+=",   "-=",  "<<=", ">>=", "&=", "^=",   "|="};
 
 struct Token
 {
