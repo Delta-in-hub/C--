@@ -1,6 +1,6 @@
 #include "token.h"
-using namespace std;
-extern std::vector<Token> tokenArr{};
+
+std::vector<Token> tokenArr{};
 
 void scan(char* buf)
 {
@@ -26,7 +26,7 @@ char* openFile(const char* path) {
     FILE* file;
     char* buf1 = new char[100];
     char* buf  = new char[100];
-    
+
     file = fopen(path, "r");
     if (!file)
     {
