@@ -1,6 +1,6 @@
 #include "token.h"
 
-extern std::vector<Token> tokenArr{};
+std::vector<Token> tokenArr{};
 
 void scan(char* buf)
 {
