@@ -1,15 +1,17 @@
 #include "stdafx.h"
 #include "token.h"
-#include<iostream>
-#include<string>
+#include <iostream>
+#include <string>
 using namespace std;
 int main(void)
 {
+    /*
     char* str;
-    string st = "Äã²ÂÄÄ´íÁË¡£";
+    string st = "ï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½Ë¡ï¿½";
     char* path = "in.txt";
     str = openFile(path);
     errorToken(str, str + 10, str+11, path, st);
     getchar();
     return 0;
+    */
 }

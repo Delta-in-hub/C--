@@ -3,7 +3,6 @@
     #include "stdafx.h"
 
 /// token.c
-
 static const std::unordered_map<std::string, std::string> tokenType{
     {"num", "TK_INUM"},
     {"dnum", "TK_DNUM"},
