@@ -67,7 +67,7 @@ enum
 "+=", "-=", "<<=", ">>=", "&=", "^=", "|=")
 */
 
-static inline const std::unordered_map<std::string, std::string> tokenType{
+static const std::unordered_map<std::string, std::string> tokenType{
     {"num", "TK_NUM"},
     {"dnum", "TK_DNUM"},
     {"int", "TK_INT"},
@@ -75,9 +75,9 @@ static inline const std::unordered_map<std::string, std::string> tokenType{
 };
 
 //关键字表
-static inline const std::unordered_set<std::string> keywords{};
+static const std::unordered_set<std::string> keywords{};
 //符号表
-static inline const std::unordered_set<std::string> symbols{};
+static const std::unordered_set<std::string> symbols{};
 
 struct Token
 {
@@ -100,6 +100,7 @@ char* openFile(const char* path);
 主过程
 分割出token, push_back到tokenArr
 */
+
 void scan(char* buf);
 
 /*

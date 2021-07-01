@@ -1,5 +1,5 @@
 #include "token.h"
-
+using namespace std;
 extern std::vector<Token> tokenArr{};
 
 void scan(char* buf)
@@ -18,4 +18,15 @@ void scan(char* buf)
         //数字常量 -> int/double
         //字符串常量
     }
+}
+
+
+
+char* openFile(const char* path) {
+    ifstream file(path);
+    char* buf = new char[BUFSIZE];
+    while (file.getline(buf,1000)) {
+
+    }
+    return buf;
 }
