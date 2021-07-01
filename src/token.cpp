@@ -41,3 +41,27 @@ char* openFile(const char* path) {
     // fgets(buf, 100, file);
     return buf;
 }
+
+
+void errorToken(char* buf, char* start, char* end, char *path,std::string msg) {
+    char* s = buf;
+    int line = 0, col = 0;
+    for (char* p = buf; p; p++) {
+        if (*p == '\n') {
+            s = p + 1;
+            line++;
+            col = 0;
+            continue;
+        }
+        if (p != start) {
+            col++;
+            continue;
+        }
+        cout << "错误说明   文件    行号    列号" << endl;
+        cout << msg << "   " << path << "   " << line << "   " << col << endl;
+        int linelen = strchr(p, '\n') - s;
+        printf("%.*s\n", linelen, s);
+        //exit(1);
+        return;
+    }
+}
