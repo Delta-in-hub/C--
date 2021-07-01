@@ -1,9 +1,4 @@
-123456789
-abcdefg
-hello
-123456789
-abcdefg
-hello
-123456789
-abcdefg
-hello
+int a=10,h;
+double c = 5.3;
+char b;
+char* b = "hello";

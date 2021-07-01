@@ -5,13 +5,17 @@
 using namespace std;
 int main(void)
 {
-    /*
+
     char* str;
-    string st = "???????��????";
-    const char* path = "in.txt";
-    str = openFile(path);
-    errorToken(str, str + 10, str+11, path, st);
+    // string st        = "???????��????";
+    const char* path = "../in.txt";
+    str              = openFile(path);
+    scan(str);
+    for (auto&& i : tokenArr)
+    {
+        cout << i.type << ' ' << string(i.start, i.end) << ' ' << i.val << ' ' << i.dval << endl;
+    }
+
     getchar();
     return 0;
-    */
 }

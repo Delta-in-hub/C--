@@ -27,6 +27,22 @@ vs里打开启用clang format
 
 [见此文件](./Grammar Zoo - Browsable C99 Grammar.pdf)
 
+这个文法存在左递归
+
+```
+declaration-list ::=
+	declaration
+	declaration-list declaration
+	
+declaration-list ::= (declaration)+ 正闭包
+```
+
+
+
+---
+
 https://github.com/rui314/9cc
 
 https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/index.html
+
+---

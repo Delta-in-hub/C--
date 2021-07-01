@@ -1,6 +1,10 @@
 #include "token.h"
 #include "string"
 using namespace std;
+
+std::vector<Token> tokenArr;
+
+
 bool startswith(string s1, string s2)
 {
     string t = s1.substr(0, s2.length());
@@ -18,12 +22,9 @@ void errorToken(char* buf, char* start, char* end, std::string msg);
 {}
 */
 
-using namespace std;
-std::vector<Token> tokenArr;
-
 void scan(char* buf)
 {
-    char* path;
+    char* path = NULL;
     int i = 0, len, tlen = 0;
     string s = buf;
     len      = s.length();
