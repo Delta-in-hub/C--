@@ -99,9 +99,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\stdafx.h" />
+    <ClInclude Include="src\token.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\token.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

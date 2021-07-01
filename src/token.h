@@ -123,6 +123,7 @@ char* openFile(const char* path);
 主过程
 分割出token, push_back到tokenArr
 */
+
 void scan(char* buf);
 
 /*

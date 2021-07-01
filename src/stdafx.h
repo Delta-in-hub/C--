@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <iostream>
 #include <iterator>
+#include <fstream>
 #include <map>
 #include <numeric>
 #include <queue>
