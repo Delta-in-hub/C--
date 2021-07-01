@@ -30,7 +30,7 @@ void scan(char* buf)
     while (i < len)
     {
         //跳过空格,注释//  or  /*
-        while (s[i] == ' ')
+        while (s[i] == ' ' or s[i] == '\n')
             i++;
         while (startswith(s.substr(i), "//"))
         {
@@ -91,13 +91,13 @@ void scan(char* buf)
             // int
             if (tempd == int(tempd))
             {
-                struct Token t = {"TK_INUM", buf + i, buf + j, int(tempd), 0};
+                struct Token t = {"TK_INUM", buf + i, buf + j + 1, int(tempd), 0};
                 tokenArr.push_back(t);
             }
             // double
             else
             {
-                struct Token t = {"TK_DNUM", buf + i, buf + j, 0, tempd};
+                struct Token t = {"TK_DNUM", buf + i, buf + j + 1, 0, tempd};
                 tokenArr.push_back(t);
             }
         }
@@ -112,10 +112,10 @@ void scan(char* buf)
             }
             tlen = temp.length() + 2;
             if (tlen != 3)
-                errorToken(buf, buf + i, buf + j, path, "字符常量格式错误");
+                errorToken(buf, buf + i, buf + j + 1, path, "字符常量格式错误");
             else
             {
-                struct Token t = {"TK_CHAR", buf + i, buf + j, s[j - 1], 0};
+                struct Token t = {"TK_CHAR", buf + i, buf + j + 1, s[j - 1], 0};
                 tokenArr.push_back(t);
             }
         }
@@ -128,33 +128,64 @@ void scan(char* buf)
             {
                 temp += s[j];
             }
-            struct Token t = {"TK_STR", buf + i, buf + j, 0, 0};
+            struct Token t = {"TK_STR", buf + i, buf + j + 1, 0, 0};
             tokenArr.push_back(t);
             tlen = temp.length() + 2;
         }
         else
         {
             int j = i;
-            while (s[j] != ' ' and s[j] != '\n' and s[j] != ';' and j < len)
+            while (isdigit(s[j]) or isalpha(s[j]) or s[j] == '_' and j < len - 1)
             {
                 j++;
             }
-            if (s[j] == ' ' or s[j] == '\n' or s[j] == ';')
+            if (j < len - 1)
                 j--;
-            tlen        = j - i + 1;
-            string temp = s.substr(i, tlen);
-            auto iter   = tokenType.find(temp);
-            //自定义标识符
-            if (iter == tokenType.end())
+            tlen = j - i + 1;
+            string temp;
+            if (tlen > 0)
             {
-                struct Token t = {"TK_IDENT", buf + i, buf + j, 0, 0};
-                tokenArr.push_back(t);
+                temp      = s.substr(i, tlen);
+                auto iter = tokenType.find(temp);
+                //自定义标识符
+                if (iter == tokenType.end())
+                {
+                    struct Token t = {"TK_IDENT", buf + i, buf + j + 1, 0, 0};
+                    tokenArr.push_back(t);
+                }
+                //关键字
+                else
+                {
+                    struct Token t = {iter->second, buf + i, buf + j + 1, 0, 0};
+                    tokenArr.push_back(t);
+                }
             }
-            //关键字,symbols
+            // symbols
             else
             {
-                struct Token t = {iter->second, buf + i, buf + j, 0, 0};
-                tokenArr.push_back(t);
+                if (j < len - 1)
+                    j++;
+                while (!(isdigit(s[j]) or isalpha(s[j]) or s[j] == '_') and j < len - 1 and s[j] != '\n' and
+                       s[j] != ' ')
+                {
+                    j++;
+                }
+                if (j < len - 1)
+                    j--;
+                tlen      = j - i + 1;
+                temp      = s.substr(i, tlen);
+                auto iter = tokenType.find(temp);
+                //错误
+                if (iter == tokenType.end())
+                {
+                    errorToken(buf, buf + i, buf + j + 1, path, "标识符格式错误");
+                }
+                // symbols
+                else
+                {
+                    struct Token t = {iter->second, buf + i, buf + j + 1, 0, 0};
+                    tokenArr.push_back(t);
+                }
             }
         }
         i += tlen;
