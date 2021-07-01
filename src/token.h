@@ -67,7 +67,7 @@ enum
 "+=", "-=", "<<=", ">>=", "&=", "^=", "|=")
 */
 
-static inline const std::unordered_map<std::string, std::string> tokenType{
+static const std::unordered_map<std::string, std::string> tokenType{
 
     {"typedef", "TK_TYPEDEF"},
     {"extern", "TK_EXTERN"},
@@ -155,11 +155,11 @@ static inline const std::unordered_map<std::string, std::string> tokenType{
 };
 
 //关键字表
-static inline const std::unordered_set<std::string> keywords{"typedef","extern","static","auto","register","void","char","short","int",
+static const std::unordered_set<std::string> keywords{"typedef","extern","static","auto","register","void","char","short","int",
 "long","float","double","signed","unsigned","_Bool","_Complex","_Imaginary","struct","union","const","restrict","volatile","sizeof","enum","inline","case","default",
 "if","else","switch","while","do","for","goto","continue","break","return"};
 //符号表
-static inline const std::unordered_set<std::string> symbols{
+static const std::unordered_set<std::string> symbols{
     "{" , "}" , ";" , "," , ":" , "*" , "(" , ")" , "[" , "]" , "?",   "||", "&&",   "|",    "^",   "&" ,
     "==",  "!=",  "<",    ">",    "<=",  ">=",  "<<",   ">>",   "+" , "-" , "/",   "%",  "++" , "--" , "." , "->",
     "...", "=" , "~",    "!",    "*=",  "/=",  "%=",   "+=",   "-=",  "<<=", ">>=", "&=", "^=",   "|="};

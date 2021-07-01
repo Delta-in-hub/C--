@@ -23,10 +23,21 @@ void scan(char* buf)
 
 
 char* openFile(const char* path) {
-    ifstream file(path);
-    char* buf = new char[BUFSIZE];
-    while (file.getline(buf,1000)) {
-
+    FILE* file;
+    char* buf1 = new char[100];
+    char* buf  = new char[100];
+    
+    file = fopen(path, "r");
+    if (!file)
+    {
+        perror(path);
+        exit(1);
     }
+    fgets(buf, 100, file);
+    while (fgets(buf1, 100, file))
+    {
+        strcat(buf, buf1);
+    }
+    // fgets(buf, 100, file);
     return buf;
 }
