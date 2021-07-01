@@ -6,7 +6,8 @@
             "command": "D:\\Program Files\\gcc10winlibs\\mingw64\\bin\\g++.exe",
             "args": [
                 "-g",
-                "${file}",
+                // "${fileDirname}\\token.cpp ${fileDirname}\\main.cpp",
+                "*.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
