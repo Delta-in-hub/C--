@@ -2,6 +2,7 @@
     #define TOKEN_
     #include "stdafx.h"
 
+
 /// token.c
 static const std::unordered_map<std::string, std::string> tokenType{
     {"num", "TK_INUM"},
@@ -114,6 +115,7 @@ struct Token
 };
 
 extern std::vector<Token> tokenArr;
+extern char* path;
 
 /*
 从path中读文件,返回字符串

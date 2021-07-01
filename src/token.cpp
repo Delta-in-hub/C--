@@ -3,7 +3,7 @@
 using namespace std;
 
 std::vector<Token> tokenArr;
-
+char* path = nullptr;
 
 bool startswith(string s1, string s2)
 {
@@ -24,7 +24,6 @@ void errorToken(char* buf, char* start, char* end, std::string msg);
 
 void scan(char* buf)
 {
-    char* path = NULL;
     int i = 0, len, tlen = 0;
     string s = buf;
     len      = s.length();

@@ -8,7 +8,7 @@ int main(void)
 
     char* str;
     // string st        = "???????��????";
-    const char* path = "../in.txt";
+    path = "../in.txt";
     str              = openFile(path);
     scan(str);
     for (auto&& i : tokenArr)
