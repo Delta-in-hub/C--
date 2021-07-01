@@ -5,6 +5,11 @@
 /// token.c
 
 static const std::unordered_map<std::string, std::string> tokenType{
+    {"num", "TK_INUM"},
+    {"dnum", "TK_DNUM"},
+    {"id", "TK_IDENT"},
+    {"char", "TK_CHAR"},
+    {"str", "TK_STR"},
     {"typedef", "TK_TYPEDEF"},
     {"extern", "TK_EXTERN"},
     {"static", "TK_STATIC"},
@@ -86,8 +91,7 @@ static const std::unordered_map<std::string, std::string> tokenType{
     {">>=", "TK_>>="},
     {"&=", "TK_&="},
     {"^=", "TK_^="},
-    {"|=", "TK_|="}
-
+    {"|=", "TK_|="},
 };
 
 //关键字表
