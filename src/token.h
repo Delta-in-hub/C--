@@ -67,15 +67,19 @@ enum
 "+=", "-=", "<<=", ">>=", "&=", "^=", "|=")
 */
 
-static inline const std::unordered_map<std::string, std::string> tokenType{
+static const std::unordered_map<std::string, std::string> tokenType{
     {"num", "TK_NUM"},
     {"dnum", "TK_DNUM"},
     {"int", "TK_INT"},
     {"==", "TK_EQ"},
+    {"typedef","TK_TYPEDEF"},
+    {"",""},
 };
 
 //关键字表
-static inline const std::unordered_set<std::string> keywords{};
+static const std::unordered_set<std::string> keywords{
+    "typedef","extern"
+};
 //符号表
 static inline const std::unordered_set<std::string> symbols{};
 
