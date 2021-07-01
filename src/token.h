@@ -138,6 +138,6 @@ token起止start,end
 -----
 要输出行数,以及那行的内容,指出位置
 */
-void errorToken(char* buf, char* start, char* end, std::string msg);
+void errorToken(char* buf, char* start, char* end, char* path, std::string msg);
 
 #endif
