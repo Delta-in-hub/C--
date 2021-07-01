@@ -9,11 +9,18 @@ int main(void)
     char* str;
     // string st        = "???????��????";
     path = "../in.txt";
-    str              = openFile(path);
+    str  = openFile(path);
     scan(str);
     for (auto&& i : tokenArr)
     {
-        cout << i.type << ' ' << string(i.start, i.end) << ' ' << i.val << ' ' << i.dval << endl;
+        if (i.type == "TK_INUM" or i.type == "TK_DNUM")
+        {
+            cout << i.type << ' ' << string(i.start, i.end) << ' ' << i.val << ' ' << i.dval << endl;
+        }
+        else
+        {
+            cout << i.type << ' ' << string(i.start, i.end) << endl;
+        }
     }
 
     getchar();

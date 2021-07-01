@@ -5,10 +5,14 @@ using namespace std;
 std::vector<Token> tokenArr;
 char* path = nullptr;
 
-bool startswith(string s1, string s2)
+static inline void sortSymbolArr()
 {
-    string t = s1.substr(0, s2.length());
-    return t == s2;
+    sort(symbols.begin(), symbols.end(), [](const string& a, const string& b) { return a.length() > b.length(); });
+}
+
+static inline bool startsWith(const string_view& s1, const string& s2)
+{
+    return s1.substr(0, s2.length()) == s2;
 }
 /*
 struct Token
@@ -30,20 +34,25 @@ void scan(char* buf)
     while (i < len)
     {
         //跳过空格,注释//  or  /*
-        while (s[i] == ' ' or s[i] == '\n')
+        if (isspace(s[i]))
+        {
             i++;
-        while (startswith(s.substr(i), "//"))
+            continue;
+        }
+        if (startsWith(string_view(s.data() + i), "//")) //原来每次判断都把剩下的所有字符复制一遍生成一个新的std::string
         {
             i += 2;
             while (s[i++] != '\n')
                 ;
+            continue;
         }
-        while (startswith(s.substr(i), "/*"))
+        if (startsWith(string_view(s.data() + i), "/*"))
         {
             i += 2;
-            while (!startswith(s.substr(i), "*/"))
+            while (!startsWith(string_view(s.data() + i), "*/"))
                 i++;
             i += 2;
+            continue;
         }
         //数字常量
         if (s[i] <= '9' and s[i] >= '0')
@@ -88,17 +97,17 @@ void scan(char* buf)
             double tempd;
             tempd = stof(temp);
             tlen  = temp.length();
-            // int
+            // ! int   这不合理吧
             if (tempd == int(tempd))
             {
                 struct Token t = {"TK_INUM", buf + i, buf + j + 1, int(tempd), 0};
-                tokenArr.push_back(t);
+                tokenArr.push_back(move(t));
             }
             // double
             else
             {
                 struct Token t = {"TK_DNUM", buf + i, buf + j + 1, 0, tempd};
-                tokenArr.push_back(t);
+                tokenArr.push_back(move(t));
             }
         }
         //字符常量
@@ -111,12 +120,12 @@ void scan(char* buf)
                 temp += s[j];
             }
             tlen = temp.length() + 2;
-            if (tlen != 3)
+            if (tlen != 3) // ! 转义字符   like  len(`\n`) == 4
                 errorToken(buf, buf + i, buf + j + 1, path, "字符常量格式错误");
             else
             {
-                struct Token t = {"TK_CHAR", buf + i, buf + j + 1, s[j - 1], 0};
-                tokenArr.push_back(t);
+                struct Token t = {"TK_CHARLITERAL", buf + i, buf + j + 1, s[j - 1], 0};
+                tokenArr.push_back(move(t));
             }
         }
         //字符串常量
@@ -124,12 +133,12 @@ void scan(char* buf)
         {
             string temp = "";
             int j       = i;
-            while (s[++j] != '\"')
+            while (s[++j] != '\"') // ! 这里也有转义的问题
             {
                 temp += s[j];
             }
             struct Token t = {"TK_STR", buf + i, buf + j + 1, 0, 0};
-            tokenArr.push_back(t);
+            tokenArr.push_back(move(t));
             tlen = temp.length() + 2;
         }
         else
@@ -146,23 +155,41 @@ void scan(char* buf)
             if (tlen > 0)
             {
                 temp      = s.substr(i, tlen);
-                auto iter = tokenType.find(temp);
+                auto iter = keywords.find(temp);
                 //自定义标识符
-                if (iter == tokenType.end())
+                if (iter == keywords.end())
                 {
                     struct Token t = {"TK_IDENT", buf + i, buf + j + 1, 0, 0};
-                    tokenArr.push_back(t);
+                    tokenArr.push_back(move(t));
                 }
                 //关键字
                 else
                 {
-                    struct Token t = {iter->second, buf + i, buf + j + 1, 0, 0};
-                    tokenArr.push_back(t);
+                    struct Token t = {tokenType.at(temp), buf + i, buf + j + 1, 0, 0};
+                    tokenArr.push_back(move(t));
                 }
             }
             // symbols
             else
             {
+                bool flag = false;
+                for (auto&& sym : symbols)
+                {
+                    if (startsWith(string_view(s.data() + i), sym))
+                    {
+                        struct Token t = {tokenType.at(sym), buf + i, buf + i + sym.length(), 0, 0};
+                        tlen           = sym.length();
+                        tokenArr.push_back(move(t));
+                        flag = true;
+                        break;
+                    }
+                }
+                if (not flag)
+                {
+                    errorToken(buf, buf + i, buf + j + 1, path, "标识符格式错误");
+                }
+                /*
+                // ! bug  );
                 if (j < len - 1)
                     j++;
                 while (!(isdigit(s[j]) or isalpha(s[j]) or s[j] == '_') and j < len - 1 and s[j] != '\n' and
@@ -174,18 +201,19 @@ void scan(char* buf)
                     j--;
                 tlen      = j - i + 1;
                 temp      = s.substr(i, tlen);
-                auto iter = tokenType.find(temp);
+                auto iter = symbols.find(temp);
                 //错误
-                if (iter == tokenType.end())
+                if (iter == symbols.end())
                 {
                     errorToken(buf, buf + i, buf + j + 1, path, "标识符格式错误");
                 }
                 // symbols
                 else
                 {
-                    struct Token t = {iter->second, buf + i, buf + j + 1, 0, 0};
-                    tokenArr.push_back(t);
+                    struct Token t = {tokenType.at(temp), buf + i, buf + j + 1, 0, 0};
+                    tokenArr.push_back(move(t));
                 }
+                */
             }
         }
         i += tlen;
@@ -194,9 +222,10 @@ void scan(char* buf)
 
 char* openFile(const char* path)
 {
+    sortSymbolArr();
     FILE* file;
     char* buf1 = new char[100];
-    char* buf  = new char[100];
+    char* buf  = new char[BUFSIZE];
 
     file = fopen(path, "r");
     if (!file)

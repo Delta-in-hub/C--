@@ -2,13 +2,12 @@
     #define TOKEN_
     #include "stdafx.h"
 
-
 /// token.c
 static const std::unordered_map<std::string, std::string> tokenType{
     {"num", "TK_INUM"},
     {"dnum", "TK_DNUM"},
     {"id", "TK_IDENT"},
-    {"char", "TK_CHAR"},
+    {"lchar", "TK_CHARLITERAL"},
     {"str", "TK_STR"},
     {"typedef", "TK_TYPEDEF"},
     {"extern", "TK_EXTERN"},
@@ -101,10 +100,10 @@ static const std::unordered_set<std::string> keywords{
     "restrict", "volatile", "sizeof", "enum",     "inline",   "case",     "default",    "if",     "else",  "switch",
     "while",    "do",       "for",    "goto",     "continue", "break",    "return"};
 //符号表
-static const std::unordered_set<std::string> symbols{
-    "{",   "}",  ";", ",", ":",  "*",  "(",  ")",  "[",  "]",   "?",   "||", "&&", "|",  "^", "&",
-    "==",  "!=", "<", ">", "<=", ">=", "<<", ">>", "+",  "-",   "/",   "%",  "++", "--", ".", "->",
-    "...", "=",  "~", "!", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|="};
+static std::vector<std::string> symbols{"{",  "}",  ";",  ",",  ":",  "*",   "(",   ")",  "[",   "]",  "?",  "||",
+                                        "&&", "|",  "^",  "&",  "==", "!=",  "<",   ">",  "<=",  ">=", "<<", ">>",
+                                        "+",  "-",  "/",  "%",  "++", "--",  ".",   "->", "...", "=",  "~",  "!",
+                                        "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=",  "|="};
 
 struct Token
 {
