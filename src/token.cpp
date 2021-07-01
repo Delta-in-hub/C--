@@ -1,5 +1,6 @@
 #include "token.h"
 
+using namespace std;
 std::vector<Token> tokenArr{};
 
 void scan(char* buf)
