@@ -5,7 +5,6 @@
 /// token.c
 
 static const std::unordered_map<std::string, std::string> tokenType{
-
     {"typedef", "TK_TYPEDEF"},
     {"extern", "TK_EXTERN"},
     {"static", "TK_STATIC"},
