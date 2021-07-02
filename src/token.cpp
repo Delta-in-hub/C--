@@ -117,15 +117,39 @@ void scan(char* buf)
             int j       = i;
             while (s[++j] != '\'')
             {
+                if (s[j] == '\\' and s[j + 1] == '\'')
+                {
+                    temp += s[j++];
+                }
                 temp += s[j];
             }
             tlen = temp.length() + 2;
-            if (tlen != 3) // ! 转义字符   like  len(`\n`) == 4
+            if (tlen > 4 or tlen < 3) // ! 转义字符   like  len(`\n`) == 4
                 errorToken(buf, buf + i, buf + j + 1, path, "字符常量格式错误");
             else
             {
-                struct Token t = {"TK_CHARLITERAL", buf + i, buf + j + 1, s[j - 1], 0};
-                tokenArr.push_back(move(t));
+                bool flag = true;
+                if (tlen == 4)
+                {
+                    flag = false;
+                    for (auto&& esc : escape)
+                    {
+                        if (esc == temp)
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+                if (flag)
+                {
+                    struct Token t = {"TK_CHARLITERAL", buf + i, buf + j + 1, s[j - 1], 0};
+                    tokenArr.push_back(move(t));
+                }
+                else
+                {
+                    errorToken(buf, buf + i, buf + j + 1, path, "字符常量格式错误");
+                }
             }
         }
         //字符串常量
@@ -135,6 +159,10 @@ void scan(char* buf)
             int j       = i;
             while (s[++j] != '\"') // ! 这里也有转义的问题
             {
+                if (s[j] == '\\' and s[j + 1] == '\"')
+                {
+                    temp += s[j++];
+                }
                 temp += s[j];
             }
             struct Token t = {"TK_STR", buf + i, buf + j + 1, 0, 0};
