@@ -90,9 +90,9 @@ void scan(char* buf)
                 }
             }
             if (s[j - 1] == '.')
-                errorToken(buf, buf + i, buf + j - 1, path, "数字常量格式错误");
+                errorToken(buf, buf + i, buf + j - 1, path, "number type error");
             if (isalpha(s[j]))
-                errorToken(buf, buf + i, buf + j, path, "数字常量格式错误");
+                errorToken(buf, buf + i, buf + j, path, "number type error");
             j--;
             double tempd;
             tempd = stof(temp);
@@ -288,11 +288,12 @@ void errorToken(char* buf, char* start, char* end, const char* path, std::string
             col++;
             continue;
         }
-        cout << "错误说明   文件    行号    列号" << endl;
-        cout << msg << "   " << path << "   " << line << "   " << col << endl;
+        cout << "error\t\t\tfile\t\tline\tcol" << endl;
+        cout << msg << "\t" << path << "\t" << line << "\t" << col << endl;
         int linelen = strchr(p, '\n') - s;
         printf("%.*s\n", linelen, s);
-        // exit(1);
-        return;
+        getchar();
+        exit(1);
+        // return;
     }
 }

@@ -1,4 +1,4 @@
-char a='\''
+int a=3.asdasd
 string a="\"asd"
 
 struct tree_el {
