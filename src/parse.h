@@ -90,7 +90,7 @@ struct Var
 // AST node
 struct Node
 {
-    int op;                   // Node type
+    NodeType op;                   // Node type
     Type* ty;                 // C type
     Node* lhs;                // left-hand side
     Node* rhs;                // right-hand side
@@ -141,7 +141,7 @@ struct Node
 
 struct Function
 {
-    char* name;
+    std::string name;
     Node* node;
     // Vector* lvars;
     std::vector<Var*> lvars;
