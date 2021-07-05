@@ -8,8 +8,9 @@ int main(void)
 
     char* str;
     // string st        = "???????��????";
-    path = "../in.txt";
-    str  = openFile(path);
+    path     = "../in.txt";
+    str      = openFile(path);
+    buferror = str; //for parse error process
     scan(str);
     for (auto&& i : tokenArr)
     {

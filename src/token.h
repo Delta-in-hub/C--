@@ -140,4 +140,7 @@ token起止start,end
 */
 void errorToken(char* buf, char* start, char* end, const char* path, std::string msg);
 
+extern char* buferror;
+void errorParse(const Token& tk, const std::string& error = "Universal Error");
+
 #endif

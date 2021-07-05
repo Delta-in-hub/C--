@@ -297,3 +297,8 @@ void errorToken(char* buf, char* start, char* end, const char* path, std::string
         // return;
     }
 }
+
+void errorParse(const Token& tk, const std::string& error = "Universal Error")
+{
+    errorToken(buferror, tk.start, tk.end, path, error.data());
+}

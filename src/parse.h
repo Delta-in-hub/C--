@@ -12,7 +12,7 @@ struct Env
     // Map* tags; //结构体
     std::unordered_map<std::string, Var*> structs;
     struct Env* prev;
-};
+}* env = nullptr;
 
 enum VarType
 {
@@ -168,5 +168,4 @@ struct Program
     // Vector* funcs;
     std::vector<Function*> funcs;
 };
-
 #endif
