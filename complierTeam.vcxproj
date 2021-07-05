@@ -98,11 +98,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\parse.h" />
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\token.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\parse.cpp" />
     <ClCompile Include="src\token.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

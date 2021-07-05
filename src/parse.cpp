@@ -239,3 +239,15 @@ Node* type_qualifier()
 }
 
 // [translation-unit,direct-declarator] <-   张天泽
+
+/*
+assignment-expression::=
+conditional-expression
+unary-expression
+assignment-operator
+assignment-expression
+*/
+
+
+
+// [assignment_expression,expression] <-   武熠栋
