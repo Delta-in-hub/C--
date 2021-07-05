@@ -3,6 +3,17 @@
 #include "stdafx.h"
 #include "token.h"
 
+struct Env
+{
+    // Map* vars; //变量
+    std::unordered_map<std::string, Var*> vars;
+    // Map* typedefs; //
+    std::unordered_map<std::string, Var*> typedefs;
+    // Map* tags; //结构体
+    std::unordered_map<std::string, Var*> structs;
+    struct Env* prev;
+};
+
 enum VarType
 {
     VOID,
@@ -90,11 +101,12 @@ struct Var
 // AST node
 struct Node
 {
-    NodeType op;                   // Node type
-    Type* ty;                 // C type
-    Node* lhs;                // left-hand side
-    Node* rhs;                // right-hand side
-    int val;                  // Number literal
+    NodeType op; // Node type
+    Type* ty;    // C type
+    Node* lhs;   // left-hand side
+    Node* rhs;   // right-hand side
+    int val;     // Number literal
+    double dval;
     Node* expr;               // "return" or expresson stmt
     std::vector<Node*> stmts; // Compound statement
     // Vector* stmts; // Compound statement
