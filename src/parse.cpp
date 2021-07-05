@@ -145,6 +145,16 @@ Node* type_specifier()
 }
 
 /*
+enumerator-list ::=
+enumerator
+enumerator-list "," enumerator
+*/
+Node* enumerator_list()
+{
+    ;
+}
+
+/*
 enum-specifier ::=
 ?enum? identifier? "{" enumerator-list "}"
 ?enum? identifier? "{" enumerator-list "," "}"
