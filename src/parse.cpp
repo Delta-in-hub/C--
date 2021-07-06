@@ -286,7 +286,6 @@ Type* pointer(Type* base)
     return t;
 }
 
-
 /*
 l_expression
         : IDENTIFIER
@@ -537,11 +536,15 @@ Node* compound_statement()
 {
     auto t = newNode();
     expect("{");
-    if (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") || consume("id")) {
+    if (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") ||
+        consume("id"))
+    {
         statement_list();
         expect("}");
     }
-    else if (consume("void") || consume("char") || consume("bool") || consume("int") || consume("double") || consume("struct")) {
+    else if (consume("void") || consume("char") || consume("bool") || consume("int") || consume("double") ||
+             consume("struct"))
+    {
         declaration_list();
         statement_list();
         expect("}");
@@ -563,7 +566,9 @@ statement_list
 Node* statement_list()
 {
     auto t = statement();
-    while (consume("return")||consume("{") || consume("if") || consume("while") || consume("for") || consume(";") || consume("id")) {
+    while (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") ||
+           consume("id"))
+    {
         pos--;
         t = statement();
     }
@@ -589,16 +594,20 @@ Node* statement()
     {
         selection_statement();
     }
-    else if (consume("while")||consume("for")) {
+    else if (consume("while") || consume("for"))
+    {
         iteration_statement();
     }
-    else if (consume(";")||consume("id")) {
+    else if (consume(";") || consume("id"))
+    {
         assignment_statement();
     }
-    else if (consume("return")) {
+    else if (consume("return"))
+    {
         expression();
     }
-    else {
+    else
+    {
         errorParse(nowToken(), "Expect statement");
     }
     return t;
@@ -613,17 +622,19 @@ assignment_statement
 Node* assignment_statement()
 {
     auto t = newNode();
-    if (consume(";")) {
-
+    if (consume(";"))
+    {
     }
-    else if (consume("id")) {
+    else if (consume("id"))
+    {
         pos--;
         l_expression();
         expect("=");
         expression();
         expect(";");
     }
-    else {
+    else
+    {
         errorParse(nowToken(), "Expect assignment");
     }
     return t;
@@ -636,24 +647,28 @@ expression
    ;
  */
 
-Node* expression(){
-    auto t = logical_and_expression();
+Node* expression()
+{
+    auto t   = logical_and_expression();
     int flag = 0;
-    while (consume("||")) {
-        auto orll = newNode();
+    while (consume("||"))
+    {
+        auto orll  = newNode();
         orll->type = ND_LOGOR;
-        if (flag == 0) {
+        if (flag == 0)
+        {
             orll->rhs = logical_and_expression();
             orll->lhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
-        else if (flag == 1) {
+        else if (flag == 1)
+        {
             orll->lhs = logical_and_expression();
             orll->rhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
-        } 
+            t         = orll;
+            flag      = (flag + 1) % 2;
+        }
     }
     return t;
 }
@@ -664,23 +679,27 @@ Node* expression(){
     | logical_and_expression AND_OP equality_expression
     ;
 */
-Node* logical_and_expression() {
-    auto t = equality_expression();
+Node* logical_and_expression()
+{
+    auto t   = equality_expression();
     int flag = 0;
-    while (consume("&&")) {
-        auto orll = newNode();
+    while (consume("&&"))
+    {
+        auto orll  = newNode();
         orll->type = ND_LOGAND;
-        if (flag == 0) {
+        if (flag == 0)
+        {
             orll->rhs = equality_expression();
             orll->lhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
-        else if (flag == 1) {
+        else if (flag == 1)
+        {
             orll->lhs = equality_expression();
             orll->rhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
     }
     return t;
@@ -692,29 +711,35 @@ equality_expression   //等式
     | equality_expression NE_OP relational_expression
     ;
 */
-Node* equality_expression() {
-    auto t = relational_expression();
+Node* equality_expression()
+{
+    auto t   = relational_expression();
     int flag = 0;
-    while (consume("==")||consume("!=")) {
+    while (consume("==") || consume("!="))
+    {
         auto orll = newNode();
         pos--;
-        if (consume("==")) {
+        if (consume("=="))
+        {
             orll->type = ND_EQ;
         }
-        else {
+        else
+        {
             orll->type = ND_NE;
         }
-        if (flag == 0) {
+        if (flag == 0)
+        {
             orll->rhs = relational_expression();
             orll->lhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
-        else if (flag == 1) {
+        else if (flag == 1)
+        {
             orll->lhs = relational_expression();
             orll->rhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
     }
     return t;
@@ -730,35 +755,43 @@ relational_expression  //关系表达式
     ;
 */
 
-Node* relational_expression(){
-    auto t = additive_expression();
+Node* relational_expression()
+{
+    auto t   = additive_expression();
     int flag = 0;
-    while (consume("<") || consume(">")|| consume("<=") || consume(">=")) {
+    while (consume("<") || consume(">") || consume("<=") || consume(">="))
+    {
         auto orll = newNode();
         pos--;
-        if (consume("<")) {
+        if (consume("<"))
+        {
             orll->type = ND_LESS;
         }
-        else if(consume(">")){
+        else if (consume(">"))
+        {
             orll->type = ND_GREAD;
         }
-        else if (consume("<=")) {
+        else if (consume("<="))
+        {
             orll->type = ND_LE;
         }
-        else if (consume(">=")) {
+        else if (consume(">="))
+        {
             orll->type = ND_GE;
         }
-        if (flag == 0) {
+        if (flag == 0)
+        {
             orll->rhs = additive_expression();
             orll->lhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
-        else if (flag == 1) {
+        else if (flag == 1)
+        {
             orll->lhs = additive_expression();
             orll->rhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
     }
     return t;
@@ -770,35 +803,40 @@ additive_expression   //加减
     | additive_expression '-' multiplicative_expression
     ;
 */
-    
-Node* additive_expression() {
-    auto t = multiplicative_expression();
+
+Node* additive_expression()
+{
+    auto t   = multiplicative_expression();
     int flag = 0;
-    while (consume("+") || consume("-")) {
+    while (consume("+") || consume("-"))
+    {
         auto orll = newNode();
         pos--;
-        if (consume("+")) {
+        if (consume("+"))
+        {
             orll->type = ND_ADD;
         }
-        else {
+        else
+        {
             orll->type = ND_SUB;
         }
-        if (flag == 0) {
+        if (flag == 0)
+        {
             orll->rhs = multiplicative_expression();
             orll->lhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
-        else if (flag == 1) {
+        else if (flag == 1)
+        {
             orll->lhs = multiplicative_expression();
             orll->rhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
     }
     return t;
 }
-    
 
 /*
 multiplicative_expression  //乘除
@@ -806,18 +844,117 @@ multiplicative_expression  //乘除
     | multiplicative_expression '*' unary_expression
     | multiplicative_expression '/' unary_expression
     ;
+*/
+Node* multiplicative_expression()
+{
+    auto t   = unary_expression();
+    int flag = 0;
+    while (consume("*") || consume("/"))
+    {
+        auto orll = newNode();
+        pos--;
+        if (consume("*"))
+        {
+            orll->type = ND_MUL;
+        }
+        else
+        {
+            orll->type = ND_DIV;
+        }
+        if (flag == 0)
+        {
+            orll->rhs = unary_expression();
+            orll->lhs = t;
+            t         = orll;
+            flag      = (flag + 1) % 2;
+        }
+        else if (flag == 1)
+        {
+            orll->lhs = unary_expression();
+            orll->rhs = t;
+            t         = orll;
+            flag      = (flag + 1) % 2;
+        }
+    }
+    return t;
+}
+/*
 unary_expression     //一元操作符
     : postfix_expression
     | unary_operator postfix_expression
     ;
+*/
 
+Node* unary_expression()
+{
+    auto t = newNode();
+    if (consume("*") or consume("-") or consume("!"))
+    {
+        pos--;
+        t      = unary_operator();
+        t->lhs = postfix_expression();
+    }
+    else
+    {
+        t = postfix_expression();
+    }
+    return t;
+}
+/*
 postfix_expression
     : primary_expression
     | IDENTIFIER '(' ')'      //函数调用
     | IDENTIFIER '(' expression_list ')'   //函数调用
-    | l_expression '++'/'--'
     ;
-
+*/
+Node* postfix_expression()
+{
+    auto t = newNode();
+    if (consume("id"))
+    {
+        if (consume("("))
+        {
+            if (consume(")"))
+            {
+                // t->type=?
+                t->expresson = NULL;
+            }
+            else
+            {
+                // t->type=?
+                // t->expresson_list = expression_list();
+            }
+        }
+        else
+        {
+            if (consume("++") or consume("--"))
+            {
+                pos--;
+                pos--;
+                t->lhs = l_expression();
+                if (consume("++"))
+                {
+                    t->type = ND_INC;
+                }
+                else
+                {
+                    t->type = ND_DEC;
+                }
+            }
+            else
+            {
+                pos--;
+                t = primary_expression();
+            }
+        }
+    }
+    else
+    {
+        t = primary_expression();
+    }
+    return t;
+}
+/*
 primary_expression
     : l_expression
     |  l_expression = expression       // added this production
@@ -825,6 +962,53 @@ primary_expression
     | FLOAT_CONSTANT
     | STRING_LITERAL
     | '(' expression ')'
+    | l_expression '++'/'--'
     ;
 */
+Node* primary_expression()
+{
+    auto t = newNode();
+    if (consume("num"))
+    {
+    }
+    else if (consume("dnum"))
+    {
+    }
+    else if (consume("str"))
+    {
+    }
+    else if (consume("("))
+    {
+        t = expression();
+        expect(")");
+    }
+    else
+    {
+        t = l_expression();
+        if (consume("="))
+        {
+            auto orll  = newNode();
+            orll->lhs  = t;
+            orll->rhs  = expression();
+            orll->type = ND_ASSIGN;
+            t          = orll;
+        }
+        else if (consume("++") or consume("--"))
+        {
+            pos--;
+            auto orll = newNode();
+            orll->lhs = t;
+            if (consume("++"))
+            {
+                orll->type = ND_INC;
+            }
+            else
+            {
+                orll->type = ND_DEC;
+            }
+            t = orll;
+        }
+    }
+    return t;
+}
 //--------------cc的分割线----------------
