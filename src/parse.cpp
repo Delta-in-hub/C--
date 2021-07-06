@@ -823,7 +823,7 @@ Node* equality_expression()
         {
             orll->type = ND_EQ;
         }
-        else
+        else if (consume("!="))
         {
             orll->type = ND_NE;
         }
@@ -916,7 +916,7 @@ Node* additive_expression()
         {
             orll->type = ND_ADD;
         }
-        else
+        else if (consume("-"))
         {
             orll->type = ND_SUB;
         }
@@ -944,17 +944,117 @@ multiplicative_expression  //乘除
     | multiplicative_expression '*' unary_expression
     | multiplicative_expression '/' unary_expression
     ;
+*/
+Node* multiplicative_expression()
+{
+    auto t   = unary_expression();
+    int flag = 0;
+    while (consume("*") || consume("/"))
+    {
+        auto orll = newNode();
+        pos--;
+        if (consume("*"))
+        {
+            orll->type = ND_MUL;
+        }
+        else if (consume("/"))
+        {
+            orll->type = ND_DIV;
+        }
+        if (flag == 0)
+        {
+            orll->rhs = unary_expression();
+            orll->lhs = t;
+            t         = orll;
+            flag      = (flag + 1) % 2;
+        }
+        else if (flag == 1)
+        {
+            orll->lhs = unary_expression();
+            orll->rhs = t;
+            t         = orll;
+            flag      = (flag + 1) % 2;
+        }
+    }
+    return t;
+}
+/*
 unary_expression     //一元操作符
     : postfix_expression
     | unary_operator postfix_expression
     ;
+*/
 
+Node* unary_expression()
+{
+    auto t = newNode();
+    if (consume("*") or consume("-") or consume("!"))
+    {
+        pos--;
+        t      = unary_operator();
+        t->lhs = postfix_expression();
+    }
+    else
+    {
+        t = postfix_expression();
+    }
+    return t;
+}
+/*
 postfix_expression
     : primary_expression
     | IDENTIFIER '(' ')'      //函数调用
     | IDENTIFIER '(' expression_list ')'   //函数调用
     ;
-
+*/
+Node* postfix_expression()
+{
+    auto t = newNode();
+    if (consume("id"))
+    {
+        if (consume("("))
+        {
+            if (consume(")"))
+            {
+                // t->type=?
+                t->expresson = NULL;
+            }
+            else
+            {
+                // t->type=?
+                // t->expresson_list = expression_list();
+            }
+        }
+        else
+        {
+            if (consume("++") or consume("--"))
+            {
+                pos--;
+                pos--;
+                t->lhs = l_expression();
+                if (consume("++"))
+                {
+                    t->type = ND_INC;
+                }
+                else if (consume("--"))
+                {
+                    t->type = ND_DEC;
+                }
+            }
+            else
+            {
+                pos--;
+                t = primary_expression();
+            }
+        }
+    }
+    else
+    {
+        t = primary_expression();
+    }
+    return t;
+}
+/*
 primary_expression
     : l_expression
     | l_expression '++'/'--'
@@ -963,6 +1063,53 @@ primary_expression
     | FLOAT_CONSTANT
     | STRING_LITERAL
     | '(' expression ')'
+    | l_expression '++'/'--'
     ;
 */
+Node* primary_expression()
+{
+    auto t = newNode();
+    if (consume("num"))
+    {
+    }
+    else if (consume("dnum"))
+    {
+    }
+    else if (consume("str"))
+    {
+    }
+    else if (consume("("))
+    {
+        t = expression();
+        expect(")");
+    }
+    else
+    {
+        t = l_expression();
+        if (consume("="))
+        {
+            auto orll  = newNode();
+            orll->lhs  = t;
+            orll->rhs  = expression();
+            orll->type = ND_ASSIGN;
+            t          = orll;
+        }
+        else if (consume("++") or consume("--"))
+        {
+            pos--;
+            auto orll = newNode();
+            orll->lhs = t;
+            if (consume("++"))
+            {
+                orll->type = ND_INC;
+            }
+            else if (consume("--"))
+            {
+                orll->type = ND_DEC;
+            }
+            t = orll;
+        }
+    }
+    return t;
+}
 //--------------cc的分割线----------------
