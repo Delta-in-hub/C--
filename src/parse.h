@@ -8,9 +8,9 @@ struct Env
     // Map* vars; //变量
     std::unordered_map<std::string, Var*> vars;
     // Map* typedefs; //
-    std::unordered_map<std::string, Var*> typedefs;
+    std::unordered_map<std::string, Type*> typedefs;
     // Map* tags; //结构体
-    std::unordered_map<std::string, Var*> structs;
+    std::unordered_map<std::string, Node*> structs;
     struct Env* prev;
 }* env = nullptr;
 
@@ -75,6 +75,8 @@ enum NodeType
     ND_FUNC,      // Function definition
     ND_COMP_STMT, // Compound statement
     ND_EXPR_STMT, // Expression statement
+    ND_NEG,       // Negitive  -
+    ND_NOT,       // Logic not !
 };
 
 // Represents a variable.
@@ -94,38 +96,44 @@ struct Var
 // AST node
 struct Node
 {
-    NodeType op; // Node type
-    Type* ty;    // C type
-    Node* lhs;   // left-hand side   一元操作用 lhs
-    Node* rhs;   // right-hand side  二元操作 用 lhs , rhs
-    int val;     // Number literal  or 数组下标
-    double dval;
-    Node* expr;               // "return" or expresson
-    std::vector<Node*> stmts; // Compound statement
-
-    std::string name;
+    NodeType type; // Node type
+    Node* lhs;     // left-hand side   一元操作用 lhs
+    Node* rhs;     // right-hand side  二元操作 用 lhs , rhs
 
     // For ND_VARREF  l_expression
     Var* var;
+    Type* ctype; // C type
+    std::string name;
+
+    int val; // Number literal
+    double dval;
+    Node* expresson; // expresson  类似  1+2  3  fun(a) 见 https://zh.cppreference.com/w/c/language/expressions
+    std::vector<Node*>* statement; // Compound statement
 
     // "if" ( cond ) then "else" els
     // "for" ( init; cond; inc ) body
     // "while" ( cond ) body
-    Node* cond;
+    Node* condition;
+    // "if" ( cond ) __then__ "else" els
     Node* then;
+    // "if" ( cond ) __then__ "else" __els__
     Node* els;
+    // "for" ( __init__; cond; inc ) body
     Node* init;
+    // "for" ( init; __cond__; inc ) body
     Node* inc;
+    // "for" ( init; cond; inc ) __body__
+    // "while" ( cond ) __body__
     Node* body; //函数体,block块...
 
     // BB* bb;
 
     // Function definition  形参(parameter)
-    std::vector<Var*> params;
+    std::vector<Type*>* params;
     // Vector* params;
 
     // Function call  实参(argument)
-    std::vector<Node*> args;
+    std::vector<Node*>* args;
     // Vector* args;
 
     // For error reporting

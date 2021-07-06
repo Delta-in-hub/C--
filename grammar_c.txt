@@ -17,18 +17,18 @@ type_specifier
     | bool pointer?
     | struct-declaration pointer?
     ;
-    
+
 struct-declaration :
     'struct' IDENTIFIER '{'  struct-declaration-list  '}'
 
 struct-declaration-list :
-    : declaration_list 
+    : declaration_list
     | struct-declaration-list declaration_list
     ;
-    
+
 
 pointer :
-    | '*' 
+    | '*'
     | '*' pointer
 
 fun_declarator
@@ -50,7 +50,7 @@ declarator
     | IDENTIFIER '[' constant_expression ']'
     ;
 
-declaratorInit 
+declaratorInit
     : '=' expression
     | 空
 
@@ -141,8 +141,9 @@ primary_expression
 
 l_expression
         : IDENTIFIER
-        | l_expression '[' expression ']' 
+        | IDENTIFIER '[' expression ']'
         ;
+
 expression_list
         : expression
         | exprssion_list ',' expression
@@ -178,4 +179,3 @@ declarator_list
     : declarator
     | declarator_list ',' declarator
     ;
-
