@@ -13,7 +13,7 @@ void expect(const std::string& tokentype, const std::string& error = "Universal 
         return;
     }
     std::string s("Expect ");
-    s += tokentype;
+    s += tokenType.at(tokentype);
     errorParse(t, s);
 }
 
@@ -122,23 +122,128 @@ Type* struct_declaration(Type* base);
 递归下降
 */
 
+void parse()
+{
+    initScope(nullptr);
+    prog = new Program;
+    while (nowToken().type != "TK_EOF")
+    {
+        translation_unit();
+    }
+}
+
 /*
 translation_unit
-
-    | type_specifier fun_declarator compound_statement  translation_unit?
-    | type_specifier declarator_list ';' translation_unit?
+    | type_specifier fun_declarator compound_statement
+    | type_specifier declarator_list ';'
     ;
 */
 Node* translation_unit()
 {
-    initScope(nullptr);
-    prog = new Program;
+    auto t = type_specifier();
+    if (nowToken().type != tokenType.at("id"))
+    {
+        errorParse(nowToken(), "Expect IDENTIFIER");
+    }
+    if (nowToken(1).type == tokenType.at("("))
+    {
+        Function* f = new Function;
+        auto fun    = fun_declarator();
+        fun->ctype  = t;
+        f->name     = fun->name;
+        f->info     = fun;
+        f->compound = compound_statement();
+        prog->funcs.push_back(f);
+    }
+    else
+    {
+        std::vector<Var*>* arr = new std::vector<Var*>;
+        declarator_list(arr);
+        expect(";");
+        for (auto&& i : *arr)
+        {
+            if (i->isArray)
+            {
+                auto ty2    = new Type;
+                ty2->ty     = VarType::ARY;
+                ty2->ary_of = t;
+                ty2->len    = i->arrLen;
+                ty2->size   = ty2->len * ty2->ptr_to->size;
+                i->ty       = ty2;
+            }
+            else
+            {
+                i->ty = t;
+            }
+            addVar(i);
+            prog->gvars.push_back(i);
+        }
+    }
 }
 
 /*
+fun_declarator
+    : IDENTIFIER '(' parameter_list ')'
+    | IDENTIFIER '(' ')'
+    ;
+*/
+Node* fun_declarator()
+{
+    auto t = newNode();
+    std::string name(nowToken().start, nowToken().end);
+    t->name = name;
+    expect("id");
+    expect("(");
+    if (consume(")"))
+    {
+        t->params = new std::vector<Type*>;
+    }
+    else
+    {
+        t->params = parameter_list();
+    }
+    return t;
+}
 
+/*
+parameter_list
+    : parameter_declaration
+    | parameter_list ',' parameter_declaration
+    ;
+*/
+std::vector<Type*>* parameter_list()
+{
+    std::vector<Type*>* arr = new std::vector<Type*>;
+    parameter_declaration(arr);
+    while (consume(","))
+    {
+        parameter_declaration(arr);
+    }
+}
+
+/*
+parameter_declaration
+    : type_specifier declarator
+    ;
+*/
+void parameter_declaration(std::vector<Type*>* arr)
+{
+    auto ty = type_specifier();
+    auto t  = declarator();
+    if (t->isArray)
+    {
+        auto nty    = new Type;
+        nty->size   = 8;
+        nty->ty     = VarType::PTR;
+        nty->ptr_to = ty;
+        arr->push_back(nty);
+        return;
+    }
+    arr->push_back(ty);
+}
+
+/*
 type_specifier
-
     : VOID pointer?
     | INT pointer?
     | FLOAT pointer?
@@ -148,39 +253,6 @@ type_specifier
     | struct-declaration pointer?
     ;
 */
-
-/*
-fun_declarator
-    : IDENTIFIER '(' parameter_list ')'
-    | IDENTIFIER '(' ')'
-    ;
-*/
-Type* fun_declarator(Type* base)
-{
-   
-}
-
-/*
-parameter_list
-    : parameter_declaration
-    | parameter_list ',' parameter_declaration
-    ;
-*/
-Node* parameter_list()
-{
-}
-
-/*
-parameter_declaration
-    : type_specifier declarator
-    ;
-*/
-
-Node* parameter_declaration()
-{
-    
-}
-//
 Type* type_specifier()
 {
     auto t = new Type;
@@ -244,6 +316,7 @@ Type* struct_declaration(Type* base)
     if (consume("{"))
     {
         struct_declaration_list(base);
+        addStruct(base, name);
         expect("}");
     }
     else
@@ -258,12 +331,16 @@ Type* struct_declaration(Type* base)
 /*
 struct-declaration-list :
     : declaration_list
-    | struct-declaration-list declaration_list
     ;
 */
-Node* struct_declaration_list(Type* base)
+void struct_declaration_list(Type* base)
 {
     base->members;
+    auto arr = declaration_list();
+    for (auto&& i : *arr)
+    {
+        base->members[i->name] = i->ty;
+    }
 }
 
 /*
@@ -285,7 +362,6 @@ Type* pointer(Type* base)
     }
     return t;
 }
-
 
 /*
 l_expression
@@ -424,13 +500,13 @@ declaration_list
 std::vector<Var*>* declaration_list()
 {
     std::vector<Var*>* arr;
-    arr    = new std::vector<Var*>;
-    auto t = declaration(arr);
+    arr = new std::vector<Var*>;
+    declaration(arr);
     while (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or
            consume("struct"))
     {
         --pos;
-        t = declaration(arr);
+        declaration(arr);
     }
     return arr;
 }
@@ -441,11 +517,27 @@ declaration
     : type_specifier declarator_list ';'
     ;
 */
-Node* declaration(std::vector<Var*>* arr)
+void declaration(std::vector<Var*>* arr)
 {
     auto ty = type_specifier();
     declarator_list(arr);
     expect(";");
+    for (auto&& i : *arr)
+    {
+        if (i->isArray)
+        {
+            auto ty2    = new Type;
+            ty2->ty     = VarType::ARY;
+            ty2->ary_of = ty;
+            ty2->len    = i->arrLen;
+            ty2->size   = ty2->len * ty2->ptr_to->size;
+            i->ty       = ty2;
+        }
+        else
+        {
+            i->ty = ty;
+        }
+    }
 }
 
 /*
@@ -454,9 +546,15 @@ declarator_list
     | declarator_list ',' declarator
     ;
 */
-Node* declarator_list(std::vector<Var*>* arr)
+void declarator_list(std::vector<Var*>* arr)
 {
-    auto t = new Var;
+    auto t = declarator();
+    arr->push_back(t);
+    while (consume(","))
+    {
+        t = declarator();
+        arr->push_back(t);
+    }
 }
 
 //--------------wyd的分割线----------------
@@ -487,8 +585,9 @@ Var* declarator()
     else if (consume("="))
     {
         --pos;
-        declaratorInit();
+        t->data = declaratorInit();
     }
+    return t;
 }
 
 /*
@@ -537,11 +636,15 @@ Node* compound_statement()
 {
     auto t = newNode();
     expect("{");
-    if (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") || consume("id")) {
+    if (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") ||
+        consume("id"))
+    {
         statement_list();
         expect("}");
     }
-    else if (consume("void") || consume("char") || consume("bool") || consume("int") || consume("double") || consume("struct")) {
+    else if (consume("void") || consume("char") || consume("bool") || consume("int") || consume("double") ||
+             consume("struct"))
+    {
         declaration_list();
         statement_list();
         expect("}");
@@ -563,7 +666,9 @@ statement_list
 Node* statement_list()
 {
     auto t = statement();
-    while (consume("return")||consume("{") || consume("if") || consume("while") || consume("for") || consume(";") || consume("id")) {
+    while (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") ||
+           consume("id"))
+    {
         pos--;
         t = statement();
     }
@@ -589,16 +694,20 @@ Node* statement()
     {
         selection_statement();
     }
-    else if (consume("while")||consume("for")) {
+    else if (consume("while") || consume("for"))
+    {
         iteration_statement();
     }
-    else if (consume(";")||consume("id")) {
+    else if (consume(";") || consume("id"))
+    {
         assignment_statement();
     }
-    else if (consume("return")) {
+    else if (consume("return"))
+    {
         expression();
     }
-    else {
+    else
+    {
         errorParse(nowToken(), "Expect statement");
     }
     return t;
@@ -613,17 +722,19 @@ assignment_statement
 Node* assignment_statement()
 {
     auto t = newNode();
-    if (consume(";")) {
-
+    if (consume(";"))
+    {
     }
-    else if (consume("id")) {
+    else if (consume("id"))
+    {
         pos--;
         l_expression();
         expect("=");
         expression();
         expect(";");
     }
-    else {
+    else
+    {
         errorParse(nowToken(), "Expect assignment");
     }
     return t;
@@ -636,24 +747,28 @@ expression
    ;
  */
 
-Node* expression(){
-    auto t = logical_and_expression();
+Node* expression()
+{
+    auto t   = logical_and_expression();
     int flag = 0;
-    while (consume("||")) {
-        auto orll = newNode();
+    while (consume("||"))
+    {
+        auto orll  = newNode();
         orll->type = ND_LOGOR;
-        if (flag == 0) {
+        if (flag == 0)
+        {
             orll->rhs = logical_and_expression();
             orll->lhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
-        else if (flag == 1) {
+        else if (flag == 1)
+        {
             orll->lhs = logical_and_expression();
             orll->rhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
-        } 
+            t         = orll;
+            flag      = (flag + 1) % 2;
+        }
     }
     return t;
 }
@@ -664,23 +779,27 @@ Node* expression(){
     | logical_and_expression AND_OP equality_expression
     ;
 */
-Node* logical_and_expression() {
-    auto t = equality_expression();
+Node* logical_and_expression()
+{
+    auto t   = equality_expression();
     int flag = 0;
-    while (consume("&&")) {
-        auto orll = newNode();
+    while (consume("&&"))
+    {
+        auto orll  = newNode();
         orll->type = ND_LOGAND;
-        if (flag == 0) {
+        if (flag == 0)
+        {
             orll->rhs = equality_expression();
             orll->lhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
-        else if (flag == 1) {
+        else if (flag == 1)
+        {
             orll->lhs = equality_expression();
             orll->rhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
     }
     return t;
@@ -692,29 +811,35 @@ equality_expression   //等式
     | equality_expression NE_OP relational_expression
     ;
 */
-Node* equality_expression() {
-    auto t = relational_expression();
+Node* equality_expression()
+{
+    auto t   = relational_expression();
     int flag = 0;
-    while (consume("==")||consume("!=")) {
+    while (consume("==") || consume("!="))
+    {
         auto orll = newNode();
         pos--;
-        if (consume("==")) {
+        if (consume("=="))
+        {
             orll->type = ND_EQ;
         }
-        else {
+        else
+        {
             orll->type = ND_NE;
         }
-        if (flag == 0) {
+        if (flag == 0)
+        {
             orll->rhs = relational_expression();
             orll->lhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
-        else if (flag == 1) {
+        else if (flag == 1)
+        {
             orll->lhs = relational_expression();
             orll->rhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
     }
     return t;
@@ -730,35 +855,43 @@ relational_expression  //关系表达式
     ;
 */
 
-Node* relational_expression(){
-    auto t = additive_expression();
+Node* relational_expression()
+{
+    auto t   = additive_expression();
     int flag = 0;
-    while (consume("<") || consume(">")|| consume("<=") || consume(">=")) {
+    while (consume("<") || consume(">") || consume("<=") || consume(">="))
+    {
         auto orll = newNode();
         pos--;
-        if (consume("<")) {
+        if (consume("<"))
+        {
             orll->type = ND_LESS;
         }
-        else if(consume(">")){
+        else if (consume(">"))
+        {
             orll->type = ND_GREAD;
         }
-        else if (consume("<=")) {
+        else if (consume("<="))
+        {
             orll->type = ND_LE;
         }
-        else if (consume(">=")) {
+        else if (consume(">="))
+        {
             orll->type = ND_GE;
         }
-        if (flag == 0) {
+        if (flag == 0)
+        {
             orll->rhs = additive_expression();
             orll->lhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
-        else if (flag == 1) {
+        else if (flag == 1)
+        {
             orll->lhs = additive_expression();
             orll->rhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
     }
     return t;
@@ -770,35 +903,40 @@ additive_expression   //加减
     | additive_expression '-' multiplicative_expression
     ;
 */
-    
-Node* additive_expression() {
-    auto t = multiplicative_expression();
+
+Node* additive_expression()
+{
+    auto t   = multiplicative_expression();
     int flag = 0;
-    while (consume("+") || consume("-")) {
+    while (consume("+") || consume("-"))
+    {
         auto orll = newNode();
         pos--;
-        if (consume("+")) {
+        if (consume("+"))
+        {
             orll->type = ND_ADD;
         }
-        else {
+        else
+        {
             orll->type = ND_SUB;
         }
-        if (flag == 0) {
+        if (flag == 0)
+        {
             orll->rhs = multiplicative_expression();
             orll->lhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
-        else if (flag == 1) {
+        else if (flag == 1)
+        {
             orll->lhs = multiplicative_expression();
             orll->rhs = t;
-            t = orll;
-            flag = (flag + 1) % 2;
+            t         = orll;
+            flag      = (flag + 1) % 2;
         }
     }
     return t;
 }
-    
 
 /*
 multiplicative_expression  //乘除
