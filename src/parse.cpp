@@ -91,17 +91,26 @@ void addStruct()
     ;
 }
 
+
+
+
+
+
+
+
+
+
 /*
 递归下降
 */
 
-/*
+/*    
 translation_unit
+
     | type_specifier fun_declarator compound_statement  translation_unit?
     | type_specifier declarator_list ';' translation_unit?
     ;
 */
-
 Node* translation_unit()
 {
     initScope(nullptr);
@@ -109,7 +118,9 @@ Node* translation_unit()
 }
 
 /*
+
 type_specifier
+
     : VOID pointer?
     | INT pointer?
     | FLOAT pointer?
@@ -119,6 +130,46 @@ type_specifier
     | struct-declaration pointer?
     ;
 */
+
+
+
+/*                                          
+fun_declarator
+    : IDENTIFIER '(' parameter_list ')'
+    | IDENTIFIER '(' ')'
+    ;
+*/
+Node* fun_declarator()
+{
+
+}
+
+
+/*
+parameter_list                                                 
+    : parameter_declaration
+    | parameter_list ',' parameter_declaration
+    ;
+*/
+Node* parameter_list()                   
+{
+
+}
+
+
+
+/*
+parameter_declaration                       
+    : type_specifier declarator
+    ;
+*/
+
+Node* parameter_declaration()
+{
+    type_specifier();
+    declarator();
+}
+//
 Type* type_specifier()
 {
     auto t = new Type;
@@ -581,3 +632,4 @@ primary_expression
     ;
 */
 //--------------cc的分割线----------------
+
