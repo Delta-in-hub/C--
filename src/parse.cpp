@@ -282,3 +282,58 @@ Node* declarator_list()
 {
     ;
 }
+
+
+
+
+
+//--------------wyd的分割线----------------
+ 
+ /*declarator
+    : IDENTIFIER declaratorInit
+    | IDENTIFIER '[' constant_expression ']'
+    ;
+
+declaratorInit 
+    : '=' expression
+    | 空
+
+constant_expression
+        : INT_CONSTANT
+        : FLOAT_CONSTANT
+        ;
+
+compound_statement
+    : '{' '}'
+    | '{' statement_list '}'
+    | '{' declaration_list statement_list '}'
+    ;
+-
+statement_list
+    : statement
+    | statement_list statement
+    ;
+
+statement
+    : compound_statement     //作用域嵌套 {{}}
+    | selection_statement    // if
+    | iteration_statement	 //while for
+    | assignment_statement   //赋值,空语句
+    | 'RETURN' expression ';'
+    ;
+
+assignment_statement
+    : ';'
+    |  l_expression '=' expression ';'
+    ;
+
+expression
+    : logical_and_expression
+    | expression OR_OP logical_and_expression
+    ;*/
+
+
+
+
+
+//--------------wyd的分割线----------------
