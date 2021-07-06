@@ -953,11 +953,11 @@ postfix_expression
     : primary_expression
     | IDENTIFIER '(' ')'      //函数调用
     | IDENTIFIER '(' expression_list ')'   //函数调用
-    | l_expression '++'/'--'
     ;
 
 primary_expression
     : l_expression
+    | l_expression '++'/'--'
     |  l_expression = expression       // added this production
     | INT_CONSTANT
     | FLOAT_CONSTANT
