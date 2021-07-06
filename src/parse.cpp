@@ -178,8 +178,7 @@ parameter_declaration
 
 Node* parameter_declaration()
 {
-     auto ty = type_specifier();
-     declarator();         //还是declarator(ty); ????????????
+    
 }
 //
 Type* type_specifier()
