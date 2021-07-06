@@ -823,7 +823,7 @@ Node* equality_expression()
         {
             orll->type = ND_EQ;
         }
-        else
+        else if (consume("!="))
         {
             orll->type = ND_NE;
         }
@@ -916,7 +916,7 @@ Node* additive_expression()
         {
             orll->type = ND_ADD;
         }
-        else
+        else if (consume("-"))
         {
             orll->type = ND_SUB;
         }
@@ -957,7 +957,7 @@ Node* multiplicative_expression()
         {
             orll->type = ND_MUL;
         }
-        else
+        else if (consume("/"))
         {
             orll->type = ND_DIV;
         }
@@ -1036,7 +1036,7 @@ Node* postfix_expression()
                 {
                     t->type = ND_INC;
                 }
-                else
+                else if (consume("--"))
                 {
                     t->type = ND_DEC;
                 }
@@ -1102,7 +1102,7 @@ Node* primary_expression()
             {
                 orll->type = ND_INC;
             }
-            else
+            else if (consume("--"))
             {
                 orll->type = ND_DEC;
             }
