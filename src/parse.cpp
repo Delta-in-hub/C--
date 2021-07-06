@@ -1010,19 +1010,22 @@ postfix_expression
 Node* postfix_expression()
 {
     auto t = newNode();
+    std::string name(nowToken().start, nowToken().end);
     if (consume("id"))
     {
         if (consume("("))
         {
             if (consume(")"))
             {
-                // t->type=?
-                t->expresson = NULL;
+                t->type = ND_CALL;
+                // t->expresson_list = NULL;
+                t->name = name;
             }
             else
             {
-                // t->type=?
+                t->type = ND_CALL;
                 // t->expresson_list = expression_list();
+                t->name = name;
             }
         }
         else
