@@ -30,9 +30,9 @@ bool consume(const std::string& tokentype)
     return true;
 }
 
-Token& nowToken()
+Token& nowToken(int p = 0)
 {
-    return tokenArr.at(pos);
+    return tokenArr.at(pos + p);
 }
 /*
 节点相关
@@ -149,8 +149,6 @@ type_specifier
     ;
 */
 
-
-
 /*
 fun_declarator
     : IDENTIFIER '(' parameter_list ')'
@@ -159,9 +157,7 @@ fun_declarator
 */
 Node* fun_declarator()
 {
-
 }
-
 
 /*
 parameter_list
@@ -171,10 +167,7 @@ parameter_list
 */
 Node* parameter_list()
 {
-
 }
-
-
 
 /*
 parameter_declaration
@@ -292,7 +285,6 @@ Type* pointer(Type* base)
     }
     return t;
 }
-
 
 Node* expression()
 {
@@ -437,13 +429,14 @@ std::vector<Var*>* declaration_list()
 {
     std::vector<Var*>* arr;
     arr    = new std::vector<Var*>;
-    auto t = declaration();
+    auto t = declaration(arr);
     while (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or
            consume("struct"))
     {
         --pos;
-        t = declaration();
+        t = declaration(arr);
     }
+    return arr;
 }
 
 /*
@@ -452,10 +445,10 @@ declaration
     : type_specifier declarator_list ';'
     ;
 */
-Node* declaration()
+Node* declaration(std::vector<Var*>* arr)
 {
     auto ty = type_specifier();
-    declarator_list(ty);
+    declarator_list(arr);
     expect(";");
 }
 
@@ -465,9 +458,9 @@ declarator_list
     | declarator_list ',' declarator
     ;
 */
-Node* declarator_list(Type* base)
+Node* declarator_list(std::vector<Var*>* arr)
 {
-    ;
+    auto t = new Var;
 }
 
 //--------------wyd的分割线----------------
@@ -478,11 +471,28 @@ declarator
    | IDENTIFIER '[' constant_expression ']'
    ;
 */
-Node* declarator()
+Var* declarator()
 {
-    Node* t = newNode();
-    t->type = ND_VARREF;
+    auto t     = new Var;
+    t->name    = std::string(nowToken().start, nowToken().end);
+    t->isArray = false;
     expect("id");
+    if (consume("["))
+    {
+        t->isArray = true;
+        auto tmp   = constant_expression();
+        if (tmp->type == ND_DNUM)
+        {
+            errorParse(nowToken(), "Length of array can not be float number");
+        }
+        t->arrLen = tmp->val;
+        expect("]");
+    }
+    else if (consume("="))
+    {
+        --pos;
+        declaratorInit();
+    }
 }
 
 /*
@@ -491,7 +501,7 @@ declaratorInit
 */
 Node* declaratorInit()
 {
-    auto t = newNode();
+    auto t  = newNode();
     t->type = ND_ASSIGN;
     expect("=");
     t->rhs = expression();
@@ -504,16 +514,21 @@ constant_expression
        : FLOAT_CONSTANT
        ;
 */
-Node* constant_expression() {
+Node* constant_expression()
+{
     auto t = newNode();
-    if (consume("int"))
+    if (consume("num"))
     {
         t->type = ND_NUM;
+        t->val  = nowToken(-1).val;
     }
-    else if (consume("float")) {
-        t->type = ND_NUM;
+    else if (consume("dnum"))
+    {
+        t->type = ND_DNUM;
+        t->dval = nowToken(-1).dval;
     }
-    else {
+    else
+    {
         errorParse(nowToken(), "Expect unary_operator");
     }
     return t;
@@ -525,19 +540,25 @@ compound_statement
    | '{' declaration_list statement_list '}'
    ;
 */
-Node* compound_statement() {
+Node* compound_statement()
+{
     auto t = newNode();
     expect("{");
-    if (consume("return") or consume("{") or consume("if") or consume("while") or consume("for") or consume(";") or consume("id")) {
+    if (consume("return") or consume("{") or consume("if") or consume("while") or consume("for") or consume(";") or
+        consume("id"))
+    {
         statement_list();
         expect("}");
     }
-    else if (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or consume("struct")) {
+    else if (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or
+             consume("struct"))
+    {
         declaration_list();
         statement_list();
         expect("}");
     }
-    else {
+    else
+    {
         expect("}");
     }
     return t;
@@ -550,9 +571,12 @@ statement_list
    ;
 */
 
-Node* statement_list() {
+Node* statement_list()
+{
     auto t = statement();
-    while (consume("return") or consume("{") or consume("if") or consume("while") or consume("for") or consume(";") or consume("id")) {
+    while (consume("return") or consume("{") or consume("if") or consume("while") or consume("for") or consume(";") or
+           consume("id"))
+    {
         pos--;
         t = statement();
     }
@@ -567,25 +591,31 @@ statement
    | 'RETURN' expression ';'
    ;
 */
-Node* statement() {
+Node* statement()
+{
     auto t = newNode();
-    if (consume("{")) {
+    if (consume("{"))
+    {
         compound_statement();
     }
-    else if (consume("if")) {
+    else if (consume("if"))
+    {
         selection_statement();
     }
-    else if (consume("while") or consume("for")) {
+    else if (consume("while") or consume("for"))
+    {
         iteration_statement();
     }
-    else if (consume(";") or consume("id")) {
+    else if (consume(";") or consume("id"))
+    {
         assignment_statement();
     }
-    else if (consume("return")) {
+    else if (consume("return"))
+    {
         errorParse(nowToken(), "Expect unary_operator");
     }
-    else {
-
+    else
+    {
     }
     return t;
 }
@@ -596,9 +626,9 @@ assignment_statement
    |  l_expression '=' expression ';'
    ;
 */
-Node* assignment_statement() {
+Node* assignment_statement()
+{
     auto t = newNode();
-
 }
 
 /*
