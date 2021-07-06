@@ -29,7 +29,7 @@ enum VarType
 
 struct Type
 {
-    VarType ty; // VarType
+    VarType ty; // VarType 
     int size;   // sizeof     bool/char 1     int 4  double 8   void* 8
     // int align; // alignof
 
@@ -51,11 +51,11 @@ struct Type
 
 enum NodeType
 {
-    ND_NUM,       // Number literal
-    ND_STRUCT,    // Struct
+    ND_NUM,       // Number literal 常量
+    ND_STRUCT,    // Struct 结构体
    // ND_DECL,      // declaration
-    ND_VARDEF,    // Variable definition
-    ND_VARREF,    // Variable reference
+    ND_VARDEF,    // Variable definition 变量定义
+    ND_VARREF,    // Variable reference 变量引用
     ND_IF,        // "if"
     ND_FOR,       // "for"
     ND_DO_WHILE,  // do ... while
@@ -71,12 +71,13 @@ enum NodeType
     ND_SHR,       // >>
     ND_MOD,       // %
     ND_RETURN,    // "return"
-    ND_CALL,      // Function call
+    ND_CALL,      // Function call 
     ND_FUNC,      // Function definition
     ND_COMP_STMT, // Compound statement
     ND_EXPR_STMT, // Expression statement
     ND_NEG,       // Negitive  -
     ND_NOT,       // Logic not !
+    ND_ASSIGN     // assign 赋值
 };
 
 // Represents a variable.
@@ -96,7 +97,7 @@ struct Var
 // AST node
 struct Node
 {
-    NodeType type; // Node type
+    NodeType type; // Node type 类型
     Node* lhs;     // left-hand side   一元操作用 lhs
     Node* rhs;     // right-hand side  二元操作 用 lhs , rhs
 
