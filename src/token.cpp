@@ -28,6 +28,7 @@ void errorToken(char* buf, char* start, char* end, std::string msg);
 
 void scan(char* buf)
 {
+
     int i = 0, len, tlen = 0;
     string s = buf;
     len      = s.length();
@@ -57,6 +58,7 @@ void scan(char* buf)
         //数字常量
         if (s[i] <= '9' and s[i] >= '0')
         {
+            bool isint  = true;
             string temp = "";
             int j       = i;
             while (s[j] <= '9' and s[j] >= '0')
@@ -82,6 +84,7 @@ void scan(char* buf)
                 }
                 if (s[j] == '.')
                 {
+                    isint = false;
                     temp += s[j++];
                     while (s[j] <= '9' and s[j] >= '0')
                     {
@@ -97,8 +100,8 @@ void scan(char* buf)
             double tempd;
             tempd = stof(temp);
             tlen  = temp.length();
-            // ! int   这不合理吧
-            if (tempd == int(tempd))
+            // ! int   这不合理吧 改了
+            if (isint == true)
             {
                 struct Token t = {"TK_INUM", buf + i, buf + j + 1, int(tempd), 0};
                 tokenArr.push_back(move(t));
@@ -157,7 +160,7 @@ void scan(char* buf)
         {
             string temp = "";
             int j       = i;
-            while (s[++j] != '\"') // ! 这里也有转义的问题
+            while (s[++j] != '\"') // ! 这里也有转义的问题 改了
             {
                 if (s[j] == '\\' and s[j + 1] == '\"')
                 {
