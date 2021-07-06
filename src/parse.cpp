@@ -181,7 +181,7 @@ Type* struct_declaration(Type* base)
     }
     if (consume("{"))
     {
-        struct_declaration_list();
+        //struct_declaration_list();
         expect("}");
     }
 }
@@ -216,19 +216,6 @@ Type* pointer(Type* base)
     return t;
 }
 
-/*
-statement
-    : compound_statement     //作用域嵌套 {{}}
-    | selection_statement    // if
-    | iteration_statement	 //while for
-    | assignment_statement   //赋值,空语句
-    | 'RETURN' expression ';'
-    ;
-*/
-Node* statement()
-{
-    ;
-}
 
 Node* expression()
 {
@@ -425,29 +412,73 @@ declaratorInit
 */
 Node* declaratorInit() {
     auto t = newNode();
+    t->type = ND_ASSIGN;
     expect("=");
-    expression();
-
+    t->rhs = expression();
+    return t;
 }
-
 
 /*
 constant_expression
        : INT_CONSTANT
        : FLOAT_CONSTANT
        ;
-
+*/
+Node* constant_expression() {
+    auto t = newNode();
+    if (consume("int"))
+    {
+        t->type = ND_NUM;
+    }
+    else if (consume("float")) {
+        t->type = ND_NUM;
+    }
+    else {
+        errorParse(nowToken(), "Expect unary_operator");
+    }
+    return t;
+}
+/*
 compound_statement
    : '{' '}'
    | '{' statement_list '}'
    | '{' declaration_list statement_list '}'
    ;
--
+*/
+Node* compound_statement() {
+    auto t = newNode();
+    expect("{");
+    if (consume("return") or consume("{") or consume("if") or consume("while") or consume("for") or consume(";") or consume("id")) {
+        statement_list();
+        expect("}");
+    }
+    else if (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or consume("struct")) {
+        declaration_list();
+        statement_list();
+        expect("}");
+    }
+    else {
+        expect("}");
+    }
+    return t;
+}
+
+/*
 statement_list
    : statement
    | statement_list statement
    ;
+*/
 
+Node* statement_list() {
+    auto t = statement();
+    while (consume("return") or consume("{") or consume("if") or consume("while") or consume("for") or consume(";") or consume("id")) {
+        pos--;
+        t = statement();
+    }
+    return t;
+}
+/*
 statement
    : compound_statement     //作用域嵌套 {{}}
    | selection_statement    // if
@@ -455,12 +486,42 @@ statement
    | assignment_statement   //赋值,空语句
    | 'RETURN' expression ';'
    ;
+*/
+Node* statement() {
+    auto t = newNode();
+    if (consume("{")) {
+        compound_statement();
+    }
+    else if (consume("if")) {
+        selection_statement();
+    }
+    else if (consume("while") or consume("for")) {
+        iteration_statement();
+    }
+    else if (consume(";") or consume("id")) {
+        assignment_statement();
+    }
+    else if (consume("return")) {
+        errorParse(nowToken(), "Expect unary_operator");
+    }
+    else {
 
+    }
+    return t;
+}
+
+/*
 assignment_statement
    : ';'
    |  l_expression '=' expression ';'
    ;
+*/
+Node* assignment_statement() {
+    auto t = newNode();
 
+}
+
+/*
 expression
    : logical_and_expression
    | expression OR_OP logical_and_expression
