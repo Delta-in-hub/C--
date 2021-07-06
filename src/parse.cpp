@@ -396,15 +396,32 @@ Node* declarator_list()
 
 //--------------wyd的分割线----------------
 
-/*declarator
-   : IDENTIFIER declaratorInit
+/*
+declarator
+   : IDENTIFIER declaratorInit?
    | IDENTIFIER '[' constant_expression ']'
    ;
+*/
+Node* declarator()
+{
+    Node* t = newNode();
+    t->type =  ND_VARREF;
+    expect("id");
+}
 
+/*
 declaratorInit
    : '=' expression
-   | 空
+*/
+Node* declaratorInit() {
+    auto t = newNode();
+    expect("=");
+    expression();
 
+}
+
+
+/*
 constant_expression
        : INT_CONSTANT
        : FLOAT_CONSTANT
