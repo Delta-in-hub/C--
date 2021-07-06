@@ -393,3 +393,103 @@ Node* declarator_list()
 {
     ;
 }
+
+//--------------wyd的分割线----------------
+
+/*declarator
+   : IDENTIFIER declaratorInit
+   | IDENTIFIER '[' constant_expression ']'
+   ;
+
+declaratorInit
+   : '=' expression
+   | 空
+
+constant_expression
+       : INT_CONSTANT
+       : FLOAT_CONSTANT
+       ;
+
+compound_statement
+   : '{' '}'
+   | '{' statement_list '}'
+   | '{' declaration_list statement_list '}'
+   ;
+-
+statement_list
+   : statement
+   | statement_list statement
+   ;
+
+statement
+   : compound_statement     //作用域嵌套 {{}}
+   | selection_statement    // if
+   | iteration_statement	 //while for
+   | assignment_statement   //赋值,空语句
+   | 'RETURN' expression ';'
+   ;
+
+assignment_statement
+   : ';'
+   |  l_expression '=' expression ';'
+   ;
+
+expression
+   : logical_and_expression
+   | expression OR_OP logical_and_expression
+   ;*/
+
+//--------------wyd的分割线----------------
+//--------------cc的分割线----------------
+/*logical_and_expression
+    : equality_expression
+    | logical_and_expression AND_OP equality_expression
+    ;
+
+equality_expression   //等式
+    : relational_expression
+    | equality_expression EQ_OP relational_expression
+    | equality_expression NE_OP relational_expression
+    ;
+
+relational_expression  //关系表达式
+    : additive_expression
+    | relational_expression '<' additive_expression
+    | relational_expression '>' additive_expression
+    | relational_expression LE_OP additive_expression
+    | relational_expression GE_OP additive_expression
+    ;
+
+additive_expression   //加减
+    : multiplicative_expression
+    | additive_expression '+' multiplicative_expression
+    | additive_expression '-' multiplicative_expression
+    ;
+
+multiplicative_expression  //乘除
+    : unary_expression
+    | multiplicative_expression '*' unary_expression
+    | multiplicative_expression '/' unary_expression
+    ;
+unary_expression     //一元操作符
+    : postfix_expression
+    | unary_operator postfix_expression
+    ;
+
+postfix_expression
+    : primary_expression
+    | IDENTIFIER '(' ')'      //函数调用
+    | IDENTIFIER '(' expression_list ')'   //函数调用
+    | l_expression '++'/'--'
+    ;
+
+primary_expression
+    : l_expression
+    |  l_expression = expression       // added this production
+    | INT_CONSTANT
+    | FLOAT_CONSTANT
+    | STRING_LITERAL
+    | '(' expression ')'
+    ;
+*/
+//--------------cc的分割线----------------
