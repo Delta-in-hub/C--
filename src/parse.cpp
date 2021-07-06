@@ -30,9 +30,9 @@ bool consume(const std::string& tokentype)
     return true;
 }
 
-Token& nowToken()
+Token& nowToken(int p = 0)
 {
-    return tokenArr.at(pos);
+    return tokenArr.at(pos + p);
 }
 /*
 节点相关
@@ -50,7 +50,10 @@ void exitScope()
 {
     auto t = env;
     env    = env->prev;
-    delete t;
+    if (env == nullptr)
+        env = t;
+    else
+        delete t;
 }
 
 Var* findVar(const std::string& name)
@@ -67,6 +70,20 @@ Var* findVar(const std::string& name)
     return nullptr;
 }
 
+Type* findStruct(const std::string& name)
+{
+    auto t = env;
+    while (t)
+    {
+        if (t->structs.find(name) != t->structs.end())
+            return t->structs.at(name);
+        else
+            t = env->prev;
+    }
+    errorParse(nowToken(), "undefined struct");
+    return nullptr;
+}
+
 Node* newNode()
 {
     auto t   = new Node;
@@ -74,37 +91,38 @@ Node* newNode()
     t->token = &nowToken();
 }
 
-void addGvar()
+void addVar(Var* v)
 {
-    ;
-}
-void addVar()
-{
-    ;
-}
-void addTypedef()
-{
-    ;
-}
-void addStruct()
-{
-    ;
+    if (env->vars.find(v->name) != env->vars.end())
+    {
+        errorParse(nowToken(), "Multi Definition");
+    }
+    else
+    {
+        env->vars[v->name] = v;
+    }
 }
 
+void addStruct(Type* ty, const std::string& name)
+{
+    if (env->vars.find(name) != env->vars.end() or env->structs.find(name) != env->structs.end())
+    {
+        errorParse(nowToken(), "Multi Definition");
+    }
+    else
+    {
+        env->structs[name] = ty;
+    }
+}
 
-
-
-
-
-
-
-
+Var* findVar(const std::string& name);
+Type* struct_declaration(Type* base);
 
 /*
 递归下降
 */
 
-/*    
+/*
 translation_unit
 
     | type_specifier fun_declarator compound_statement  translation_unit?
@@ -131,9 +149,7 @@ type_specifier
     ;
 */
 
-
-
-/*                                          
+/*
 fun_declarator
     : IDENTIFIER '(' parameter_list ')'
     | IDENTIFIER '(' ')'
@@ -141,25 +157,20 @@ fun_declarator
 */
 Node* fun_declarator()
 {
-
 }
 
-
 /*
-parameter_list                                                 
+parameter_list
     : parameter_declaration
     | parameter_list ',' parameter_declaration
     ;
 */
-Node* parameter_list()                   
+Node* parameter_list()
 {
-
 }
 
-
-
 /*
-parameter_declaration                       
+parameter_declaration
     : type_specifier declarator
     ;
 */
@@ -202,7 +213,7 @@ Type* type_specifier()
     {
         --pos;
         t->ty = VarType::STRUCT;
-        struct_declaration(t);
+        t     = struct_declaration(t);
     }
     else
         errorParse(nowToken(), "Expect type_specifier");
@@ -232,9 +243,17 @@ Type* struct_declaration(Type* base)
     }
     if (consume("{"))
     {
-        //struct_declaration_list();
+        struct_declaration_list(base);
         expect("}");
     }
+    else
+    {
+        if (name.empty())
+            errorParse(nowToken(), "Expect struct name");
+        else
+            return findStruct(name);
+    }
+    return base;
 }
 /*
 struct-declaration-list :
@@ -402,15 +421,18 @@ declaration_list
     | declaration_list declaration
     ;
 */
-Node* declaration_list()
+std::vector<Var*>* declaration_list()
 {
-    auto t = declaration();
+    std::vector<Var*>* arr;
+    arr    = new std::vector<Var*>;
+    auto t = declaration(arr);
     while (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or
            consume("struct"))
     {
         --pos;
-        t = declaration();
+        t = declaration(arr);
     }
+    return arr;
 }
 
 /*
@@ -419,10 +441,10 @@ declaration
     : type_specifier declarator_list ';'
     ;
 */
-Node* declaration()
+Node* declaration(std::vector<Var*>* arr)
 {
     auto ty = type_specifier();
-    declarator_list(ty);
+    declarator_list(arr);
     expect(";");
 }
 
@@ -432,9 +454,9 @@ declarator_list
     | declarator_list ',' declarator
     ;
 */
-Node* declarator_list(Type* base)
+Node* declarator_list(std::vector<Var*>* arr)
 {
-    ;
+    auto t = new Var;
 }
 
 //--------------wyd的分割线----------------
@@ -445,19 +467,37 @@ declarator
    | IDENTIFIER '[' constant_expression ']'
    ;
 */
-Node* declarator()
+Var* declarator()
 {
-    Node* t = newNode();
-    t->type =  ND_VARREF;
+    auto t     = new Var;
+    t->name    = std::string(nowToken().start, nowToken().end);
+    t->isArray = false;
     expect("id");
+    if (consume("["))
+    {
+        t->isArray = true;
+        auto tmp   = constant_expression();
+        if (tmp->type == ND_DNUM)
+        {
+            errorParse(nowToken(), "Length of array can not be float number");
+        }
+        t->arrLen = tmp->val;
+        expect("]");
+    }
+    else if (consume("="))
+    {
+        --pos;
+        declaratorInit();
+    }
 }
 
 /*
 declaratorInit
    : '=' expression
 */
-Node* declaratorInit() {
-    auto t = newNode();
+Node* declaratorInit()
+{
+    auto t  = newNode();
     t->type = ND_ASSIGN;
     expect("=");
     t->rhs = expression();
@@ -470,17 +510,22 @@ constant_expression
        : DOUBLE_CONSTANT
        ;
 */
-Node* constant_expression() {
+Node* constant_expression()
+{
     auto t = newNode();
-    if (consume("int"))
+    if (consume("num"))
     {
         t->type = ND_NUM;
+        t->val  = nowToken(-1).val;
     }
-    else if (consume("double")) {
-        t->type = ND_NUM;
+    else if (consume("dnum"))
+    {
+        t->type = ND_DNUM;
+        t->dval = nowToken(-1).dval;
     }
-    else {
-        errorParse(nowToken(), "Expect constant");
+    else
+    {
+        errorParse(nowToken(), "Expect unary_operator");
     }
     return t;
 }
@@ -491,7 +536,8 @@ compound_statement
    | '{' declaration_list statement_list '}'
    ;
 */
-Node* compound_statement() {
+Node* compound_statement()
+{
     auto t = newNode();
     expect("{");
     if (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") || consume("id")) {
@@ -503,7 +549,8 @@ Node* compound_statement() {
         statement_list();
         expect("}");
     }
-    else {
+    else
+    {
         expect("}");
     }
     return t;
@@ -516,7 +563,8 @@ statement_list
    ;
 */
 
-Node* statement_list() {
+Node* statement_list()
+{
     auto t = statement();
     while (consume("return")||consume("{") || consume("if") || consume("while") || consume("for") || consume(";") || consume("id")) {
         pos--;
@@ -533,12 +581,15 @@ statement
    | 'RETURN' expression ';'
    ;
 */
-Node* statement() {
+Node* statement()
+{
     auto t = newNode();
-    if (consume("{")) {
+    if (consume("{"))
+    {
         compound_statement();
     }
-    else if (consume("if")) {
+    else if (consume("if"))
+    {
         selection_statement();
     }
     else if (consume("while")||consume("for")) {
@@ -562,7 +613,8 @@ assignment_statement
    |  l_expression '=' expression ';'
    ;
 */
-Node* assignment_statement() {
+Node* assignment_statement()
+{
     auto t = newNode();
     if (consume(";")) {
 
@@ -656,4 +708,3 @@ primary_expression
     ;
 */
 //--------------cc的分割线----------------
-

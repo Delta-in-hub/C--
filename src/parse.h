@@ -29,7 +29,7 @@ enum VarType
 
 struct Type
 {
-    VarType ty; // VarType 
+    VarType ty; // VarType
     int size;   // sizeof     bool/char 1     int 4  double 8   void* 8
     // int align; // alignof
 
@@ -52,8 +52,9 @@ struct Type
 enum NodeType
 {
     ND_NUM,       // Number literal 常量
+    ND_DNUM,      // Double Number literal 浮点常量
     ND_STRUCT,    // Struct 结构体
-   // ND_DECL,      // declaration
+                  // ND_DECL,      // declaration
     ND_VARDEF,    // Variable definition 变量定义
     ND_VARREF,    // Variable reference 变量引用
     ND_IF,        // "if"
@@ -71,7 +72,7 @@ enum NodeType
     ND_SHR,       // >>
     ND_MOD,       // %
     ND_RETURN,    // "return"
-    ND_CALL,      // Function call 
+    ND_CALL,      // Function call
     ND_FUNC,      // Function definition
     ND_COMP_STMT, // Compound statement
     ND_EXPR_STMT, // Expression statement
@@ -84,14 +85,17 @@ enum NodeType
 struct Var
 {
     Type* ty;
-    char* name;
+    std::string name;
+
+    bool isArray;
+    int arrLen;
     bool is_local;
     // Local variables are compiled to offsets from RBP.
     int offset;
 
     // Global variables are compiled to labels with optional
     // initialized data.
-    char* data;
+    Node* data;
 };
 
 // AST node
