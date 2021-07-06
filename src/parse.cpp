@@ -497,11 +497,8 @@ declaratorInit
 */
 Node* declaratorInit()
 {
-    auto t  = newNode();
-    t->type = ND_ASSIGN;
     expect("=");
-    t->rhs = expression();
-    return t;
+    return expression();
 }
 
 /*
@@ -641,12 +638,22 @@ expression
 
 Node* expression(){
     auto t = logical_and_expression();
-    while (consume("id") || consume("int") || consume("double") || consume("string") || consume("(") || consume("*") || consume("-") || consume("!")) {
-        pos--;
-        t = logical_and_expression();
-        if (consume("or")) {
-            continue;
+    int flag = 0;
+    while (consume("||")) {
+        auto orll = newNode();
+        orll->type = ND_LOGOR;
+        if (flag == 0) {
+            orll->rhs = logical_and_expression();
+            orll->lhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
         }
+        else if (flag == 1) {
+            orll->lhs = logical_and_expression();
+            orll->rhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        } 
     }
     return t;
 }
@@ -658,7 +665,25 @@ Node* expression(){
     ;
 */
 Node* logical_and_expression() {
-    ;
+    auto t = equality_expression();
+    int flag = 0;
+    while (consume("&&")) {
+        auto orll = newNode();
+        orll->type = ND_LOGAND;
+        if (flag == 0) {
+            orll->rhs = equality_expression();
+            orll->lhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+        else if (flag == 1) {
+            orll->lhs = equality_expression();
+            orll->rhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+    }
+    return t;
 }
 /*
 equality_expression   //等式
@@ -666,7 +691,36 @@ equality_expression   //等式
     | equality_expression EQ_OP relational_expression
     | equality_expression NE_OP relational_expression
     ;
+*/
+Node* equality_expression() {
+    auto t = relational_expression();
+    int flag = 0;
+    while (consume("==")||consume("!=")) {
+        auto orll = newNode();
+        pos--;
+        if (consume("==")) {
+            orll->type = ND_EQ;
+        }
+        else {
+            orll->type = ND_NE;
+        }
+        if (flag == 0) {
+            orll->rhs = relational_expression();
+            orll->lhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+        else if (flag == 1) {
+            orll->lhs = relational_expression();
+            orll->rhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+    }
+    return t;
+}
 
+/*
 relational_expression  //关系表达式
     : additive_expression
     | relational_expression '<' additive_expression
@@ -674,13 +728,79 @@ relational_expression  //关系表达式
     | relational_expression LE_OP additive_expression
     | relational_expression GE_OP additive_expression
     ;
+*/
 
+Node* relational_expression(){
+    auto t = additive_expression();
+    int flag = 0;
+    while (consume("<") || consume(">")|| consume("<=") || consume(">=")) {
+        auto orll = newNode();
+        pos--;
+        if (consume("<")) {
+            orll->type = ND_LESS;
+        }
+        else if(consume(">")){
+            orll->type = ND_GREAD;
+        }
+        else if (consume("<=")) {
+            orll->type = ND_LE;
+        }
+        else if (consume(">=")) {
+            orll->type = ND_GE;
+        }
+        if (flag == 0) {
+            orll->rhs = additive_expression();
+            orll->lhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+        else if (flag == 1) {
+            orll->lhs = additive_expression();
+            orll->rhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+    }
+    return t;
+}
+/*
 additive_expression   //加减
     : multiplicative_expression
     | additive_expression '+' multiplicative_expression
     | additive_expression '-' multiplicative_expression
     ;
+*/
+    
+Node* additive_expression() {
+    auto t = multiplicative_expression();
+    int flag = 0;
+    while (consume("+") || consume("-")) {
+        auto orll = newNode();
+        pos--;
+        if (consume("+")) {
+            orll->type = ND_ADD;
+        }
+        else {
+            orll->type = ND_SUB;
+        }
+        if (flag == 0) {
+            orll->rhs = multiplicative_expression();
+            orll->lhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+        else if (flag == 1) {
+            orll->lhs = multiplicative_expression();
+            orll->rhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+    }
+    return t;
+}
+    
 
+/*
 multiplicative_expression  //乘除
     : unary_expression
     | multiplicative_expression '*' unary_expression
