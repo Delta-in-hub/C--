@@ -157,9 +157,9 @@ fun_declarator
     | IDENTIFIER '(' ')'
     ;
 */
-Node* fun_declarator()
+Type* fun_declarator(Type* base)
 {
-
+   
 }
 
 
@@ -184,8 +184,8 @@ parameter_declaration
 
 Node* parameter_declaration()
 {
-    type_specifier();
-    declarator();
+     auto ty = type_specifier();
+     declarator();         //还是declarator(ty); ????????????
 }
 //
 Type* type_specifier()
