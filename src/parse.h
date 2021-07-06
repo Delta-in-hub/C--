@@ -66,6 +66,11 @@ enum NodeType
     ND_EQ,        // ==
     ND_NE,        // !=
     ND_LE,        // <=
+    ND_GE,        // >= 
+    ND_LESS,      // <
+    ND_GREAD,     // >
+    ND_ADD,       // +
+    ND_SUB,       // -
     ND_LOGAND,    // &&
     ND_LOGOR,     // ||
     ND_SHL,       // <<
@@ -79,6 +84,7 @@ enum NodeType
     ND_NEG,       // Negitive  -
     ND_NOT,       // Logic not !
     ND_ASSIGN     // assign 赋值
+
 };
 
 // Represents a variable.
