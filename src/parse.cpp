@@ -1060,6 +1060,7 @@ Node* postfix_expression()
 /*
 primary_expression
     : l_expression
+    | l_expression '++'/'--'
     |  l_expression = expression       // added this production
     | INT_CONSTANT
     | FLOAT_CONSTANT
