@@ -10,7 +10,7 @@ struct Env
     // Map* typedefs; //
     std::unordered_map<std::string, Type*> typedefs;
     // Map* tags; //结构体
-    std::unordered_map<std::string, Node*> structs;
+    std::unordered_map<std::string, Type*> structs;
     struct Env* prev;
 }* env = nullptr;
 

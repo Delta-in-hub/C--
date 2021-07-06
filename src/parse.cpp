@@ -104,6 +104,111 @@ Node* translation_unit()
 }
 
 /*
+type_specifier
+    : VOID pointer?
+    | INT pointer?
+    | FLOAT pointer?
+    | char pointer?
+    | double pointer?
+    | bool pointer?
+    | struct-declaration pointer?
+    ;
+*/
+Type* type_specifier()
+{
+    auto t = new Type;
+    if (consume("void"))
+    {
+        t->ty   = VarType::VOID;
+        t->size = 1;
+    }
+    else if (consume("int"))
+    {
+        t->ty   = VarType::INT;
+        t->size = 4;
+    }
+    else if (consume("float") or consume("double"))
+    {
+        t->ty   = VarType::DOUBLE;
+        t->size = 8;
+    }
+    else if (consume("char"))
+    {
+        t->ty   = VarType::CHAR;
+        t->size = 1;
+    }
+    else if (consume("bool"))
+    {
+        t->ty   = VarType::BOOL;
+        t->size = 1;
+    }
+    else if (consume("struct"))
+    {
+        --pos;
+        t->ty = VarType::STRUCT;
+        struct_declaration(t);
+    }
+    else
+        errorParse(nowToken(), "Expect type_specifier");
+
+    if (consume("*"))
+    {
+        --pos;
+        t = pointer(t);
+    }
+    return t;
+}
+/*
+struct-declaration :
+    'struct' IDENTIFIER? '{'  struct-declaration-list  '}'
+*/
+Type* struct_declaration(Type* base)
+{
+    expect("struct");
+    base->ty = VarType::STRUCT;
+    if (consume("id"))
+    {
+        --pos;
+        auto pso = env->structs[std::string(nowToken().start, nowToken().end)];
+        ++pos;
+    }
+    else
+    {
+        ;
+    }
+}
+/*
+struct-declaration-list :
+    : declaration_list
+    | struct-declaration-list declaration_list
+    ;
+*/
+Node* struct_declaration_list()
+{
+    ;
+}
+
+/*
+pointer :
+    | '*'
+    | '*' pointer
+*/
+Type* pointer(Type* base)
+{
+    expect("*");
+    auto t    = new Type;
+    t->size   = 8;
+    t->ty     = VarType::PTR;
+    t->ptr_to = base;
+    while (consume("*"))
+    {
+        --pos;
+        t = pointer(t);
+    }
+    return t;
+}
+
+/*
 statement
     : compound_statement     //作用域嵌套 {{}}
     | selection_statement    // if
@@ -259,6 +364,12 @@ declaration_list
 Node* declaration_list()
 {
     auto t = declaration();
+    while (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or
+           consume("struct"))
+    {
+        --pos;
+        t = declaration();
+    }
 }
 
 /*
