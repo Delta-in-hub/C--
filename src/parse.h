@@ -83,7 +83,7 @@ enum NodeType
 struct Var
 {
     Type* ty;
-    char* name;
+    std::string name;
     bool is_local;
     // Local variables are compiled to offsets from RBP.
     int offset;

@@ -50,7 +50,10 @@ void exitScope()
 {
     auto t = env;
     env    = env->prev;
-    delete t;
+    if (env == nullptr)
+        env = t;
+    else
+        delete t;
 }
 
 Var* findVar(const std::string& name)
@@ -67,6 +70,20 @@ Var* findVar(const std::string& name)
     return nullptr;
 }
 
+Type* findStruct(const std::string& name)
+{
+    auto t = env;
+    while (t)
+    {
+        if (t->structs.find(name) != t->structs.end())
+            return t->structs.at(name);
+        else
+            t = env->prev;
+    }
+    errorParse(nowToken(), "undefined struct");
+    return nullptr;
+}
+
 Node* newNode()
 {
     auto t   = new Node;
@@ -74,22 +91,32 @@ Node* newNode()
     t->token = &nowToken();
 }
 
-void addGvar()
+void addVar(Var* v)
 {
-    ;
+    if (env->vars.find(v->name) != env->vars.end())
+    {
+        errorParse(nowToken(), "Multi Definition");
+    }
+    else
+    {
+        env->vars[v->name] = v;
+    }
 }
-void addVar()
+
+void addStruct(Type* ty, const std::string& name)
 {
-    ;
+    if (env->vars.find(name) != env->vars.end() or env->structs.find(name) != env->structs.end())
+    {
+        errorParse(nowToken(), "Multi Definition");
+    }
+    else
+    {
+        env->structs[name] = ty;
+    }
 }
-void addTypedef()
-{
-    ;
-}
-void addStruct()
-{
-    ;
-}
+
+Var* findVar(const std::string& name);
+Type* struct_declaration(Type* base);
 
 /*
 递归下降
@@ -151,7 +178,7 @@ Type* type_specifier()
     {
         --pos;
         t->ty = VarType::STRUCT;
-        struct_declaration(t);
+        t     = struct_declaration(t);
     }
     else
         errorParse(nowToken(), "Expect type_specifier");
@@ -181,9 +208,17 @@ Type* struct_declaration(Type* base)
     }
     if (consume("{"))
     {
-        struct_declaration_list();
+        struct_declaration_list(base);
         expect("}");
     }
+    else
+    {
+        if (name.empty())
+            errorParse(nowToken(), "Expect struct name");
+        else
+            return findStruct(name);
+    }
+    return base;
 }
 /*
 struct-declaration-list :
@@ -369,8 +404,10 @@ declaration_list
     | declaration_list declaration
     ;
 */
-Node* declaration_list()
+std::vector<Var*>* declaration_list()
 {
+    std::vector<Var*>* arr;
+    arr    = new std::vector<Var*>;
     auto t = declaration();
     while (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or
            consume("struct"))
@@ -415,7 +452,7 @@ declarator
 Node* declarator()
 {
     Node* t = newNode();
-    t->type =  ND_VARREF;
+    t->type = ND_VARREF;
     expect("id");
 }
 
@@ -423,13 +460,12 @@ Node* declarator()
 declaratorInit
    : '=' expression
 */
-Node* declaratorInit() {
+Node* declaratorInit()
+{
     auto t = newNode();
     expect("=");
     expression();
-
 }
-
 
 /*
 constant_expression
