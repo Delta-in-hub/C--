@@ -268,11 +268,6 @@ Type* pointer(Type* base)
 }
 
 
-Node* expression()
-{
-    ;
-}
-
 /*
 l_expression
         : IDENTIFIER
@@ -472,7 +467,7 @@ Node* declaratorInit() {
 /*
 constant_expression
        : INT_CONSTANT
-       : FLOAT_CONSTANT
+       : DOUBLE_CONSTANT
        ;
 */
 Node* constant_expression() {
@@ -481,11 +476,11 @@ Node* constant_expression() {
     {
         t->type = ND_NUM;
     }
-    else if (consume("float")) {
+    else if (consume("double")) {
         t->type = ND_NUM;
     }
     else {
-        errorParse(nowToken(), "Expect unary_operator");
+        errorParse(nowToken(), "Expect constant");
     }
     return t;
 }
@@ -499,11 +494,11 @@ compound_statement
 Node* compound_statement() {
     auto t = newNode();
     expect("{");
-    if (consume("return") or consume("{") or consume("if") or consume("while") or consume("for") or consume(";") or consume("id")) {
+    if (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") || consume("id")) {
         statement_list();
         expect("}");
     }
-    else if (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or consume("struct")) {
+    else if (consume("void") || consume("char") || consume("bool") || consume("int") || consume("double") || consume("struct")) {
         declaration_list();
         statement_list();
         expect("}");
@@ -523,7 +518,7 @@ statement_list
 
 Node* statement_list() {
     auto t = statement();
-    while (consume("return") or consume("{") or consume("if") or consume("while") or consume("for") or consume(";") or consume("id")) {
+    while (consume("return")||consume("{") || consume("if") || consume("while") || consume("for") || consume(";") || consume("id")) {
         pos--;
         t = statement();
     }
@@ -546,17 +541,17 @@ Node* statement() {
     else if (consume("if")) {
         selection_statement();
     }
-    else if (consume("while") or consume("for")) {
+    else if (consume("while")||consume("for")) {
         iteration_statement();
     }
-    else if (consume(";") or consume("id")) {
+    else if (consume(";")||consume("id")) {
         assignment_statement();
     }
     else if (consume("return")) {
-        errorParse(nowToken(), "Expect unary_operator");
+        expression();
     }
     else {
-
+        errorParse(nowToken(), "Expect statement");
     }
     return t;
 }
@@ -569,22 +564,51 @@ assignment_statement
 */
 Node* assignment_statement() {
     auto t = newNode();
+    if (consume(";")) {
 
+    }
+    else if (consume("id")) {
+        pos--;
+        l_expression();
+        expect("=");
+        expression();
+        expect(";");
+    }
+    else {
+        errorParse(nowToken(), "Expect assignment");
+    }
+    return t;
 }
 
 /*
 expression
    : logical_and_expression
    | expression OR_OP logical_and_expression
-   ;*/
+   ;
+ */
 
+Node* expression(){
+    auto t = logical_and_expression();
+    while (consume("id") || consume("int") || consume("double") || consume("string") || consume("(") || consume("*") || consume("-") || consume("!")) {
+        pos--;
+        t = logical_and_expression();
+        if (consume("or")) {
+            continue;
+        }
+    }
+    return t;
+}
 //--------------wyd的分割线----------------
 //--------------cc的分割线----------------
 /*logical_and_expression
     : equality_expression
     | logical_and_expression AND_OP equality_expression
     ;
-
+*/
+Node* logical_and_expression() {
+    ;
+}
+/*
 equality_expression   //等式
     : relational_expression
     | equality_expression EQ_OP relational_expression
