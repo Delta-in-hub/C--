@@ -249,6 +249,7 @@ void scan(char* buf)
         }
         i += tlen;
     }
+    tokenArr.push_back({"TK_EOF", buf + i, buf + i + 1, 0, 0});
 }
 
 char* openFile(const char* path)

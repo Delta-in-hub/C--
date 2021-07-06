@@ -56,16 +56,11 @@ enum NodeType
     ND_DECL,      // declaration
     ND_VARDEF,    // Variable definition
     ND_VARREF,    // Variable reference
-    ND_CAST,      // Cast
     ND_IF,        // "if"
     ND_FOR,       // "for"
     ND_DO_WHILE,  // do ... while
-    ND_SWITCH,    // switch
-    ND_CASE,      // case
-    ND_BREAK,     // break
-    ND_CONTINUE,  // continue
     ND_ADDR,      // address-of operator ("&")
-    ND_DEREF,     // pointer dereference ("*")
+    ND_DEREF,     // pointer dereference ("*")  数组
     ND_DOT,       // Struct member access
     ND_EQ,        // ==
     ND_NE,        // !=
@@ -80,8 +75,6 @@ enum NodeType
     ND_FUNC,      // Function definition
     ND_COMP_STMT, // Compound statement
     ND_EXPR_STMT, // Expression statement
-    ND_STMT_EXPR, // Statement expression (GNU extn.)
-    ND_NULL,      // Null statement
 };
 
 // Represents a variable.
@@ -103,25 +96,21 @@ struct Node
 {
     NodeType op; // Node type
     Type* ty;    // C type
-    Node* lhs;   // left-hand side
-    Node* rhs;   // right-hand side
-    int val;     // Number literal
+    Node* lhs;   // left-hand side   一元操作用 lhs
+    Node* rhs;   // right-hand side  二元操作 用 lhs , rhs
+    int val;     // Number literal  or 数组下标
     double dval;
-    Node* expr;               // "return" or expresson stmt
+    Node* expr;               // "return" or expresson
     std::vector<Node*> stmts; // Compound statement
-    // Vector* stmts; // Compound statement
 
-    char* name;
+    std::string name;
 
-    // For ND_VARREF
+    // For ND_VARREF  l_expression
     Var* var;
 
     // "if" ( cond ) then "else" els
     // "for" ( init; cond; inc ) body
     // "while" ( cond ) body
-    // "do" body "while" ( cond )
-    // "switch" ( cond ) body
-    // "case" val ":" body
     Node* cond;
     Node* then;
     Node* els;
@@ -129,15 +118,7 @@ struct Node
     Node* inc;
     Node* body; //函数体,block块...
 
-    // For switch and case
-    std::vector<Node*> cases;
-    // Vector* cases;
     // BB* bb;
-
-    // For case, break and continue
-    Node* target;
-    // BB* break_;
-    // BB* continue_;
 
     // Function definition  形参(parameter)
     std::vector<Var*> params;
@@ -167,5 +148,5 @@ struct Program
     std::vector<Var*> gvars;
     // Vector* funcs;
     std::vector<Function*> funcs;
-};
+} * prog;
 #endif
