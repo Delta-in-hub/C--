@@ -156,8 +156,9 @@ struct Node
 
 struct Function
 {
+    Node* info;
     std::string name;
-    Node* node;
+    Node* compound;
     // Vector* lvars;
     std::vector<Var*> lvars;
     // Vector* bbs;

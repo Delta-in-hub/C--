@@ -13,7 +13,7 @@ void expect(const std::string& tokentype, const std::string& error = "Universal 
         return;
     }
     std::string s("Expect ");
-    s += tokentype;
+    s += tokenType.at(tokentype);
     errorParse(t, s);
 }
 
@@ -122,32 +122,64 @@ Type* struct_declaration(Type* base);
 递归下降
 */
 
+void parse()
+{
+    initScope(nullptr);
+    prog = new Program;
+    while (nowToken().type != "TK_EOF")
+    {
+        translation_unit();
+    }
+}
+
 /*
 translation_unit
-
-    | type_specifier fun_declarator compound_statement  translation_unit?
-    | type_specifier declarator_list ';' translation_unit?
+    | type_specifier fun_declarator compound_statement
+    | type_specifier declarator_list ';'
     ;
 */
 Node* translation_unit()
 {
-    initScope(nullptr);
-    prog = new Program;
+    auto t = type_specifier();
+    if (nowToken().type != tokenType.at("id"))
+    {
+        errorParse(nowToken(), "Expect IDENTIFIER");
+    }
+    if (nowToken(1).type == tokenType.at("("))
+    {
+        Function* f = new Function;
+        auto fun    = fun_declarator();
+        fun->ctype  = t;
+        f->name     = fun->name;
+        f->info     = fun;
+        f->compound = compound_statement();
+        prog->funcs.push_back(f);
+    }
+    else
+    {
+        std::vector<Var*>* arr = new std::vector<Var*>;
+        declarator_list(arr);
+        expect(";");
+        for (auto&& i : *arr)
+        {
+            if (i->isArray)
+            {
+                auto ty2    = new Type;
+                ty2->ty     = VarType::ARY;
+                ty2->ary_of = t;
+                ty2->len    = i->arrLen;
+                ty2->size   = ty2->len * ty2->ptr_to->size;
+                i->ty       = ty2;
+            }
+            else
+            {
+                i->ty = t;
+            }
+            addVar(i);
+            prog->gvars.push_back(i);
+        }
+    }
 }
-
-/*
-
-type_specifier
-
-    : VOID pointer?
-    | INT pointer?
-    | FLOAT pointer?
-    | char pointer?
-    | double pointer?
-    | bool pointer?
-    | struct-declaration pointer?
-    ;
-*/
 
 /*
 fun_declarator
@@ -157,6 +189,20 @@ fun_declarator
 */
 Node* fun_declarator()
 {
+    auto t = newNode();
+    std::string name(nowToken().start, nowToken().end);
+    t->name = name;
+    expect("id");
+    expect("(");
+    if (consume(")"))
+    {
+        t->params = new std::vector<Type*>;
+    }
+    else
+    {
+        t->params = parameter_list();
+    }
+    return t;
 }
 
 /*
@@ -165,8 +211,14 @@ parameter_list
     | parameter_list ',' parameter_declaration
     ;
 */
-Node* parameter_list()
+std::vector<Type*>* parameter_list()
 {
+    std::vector<Type*>* arr = new std::vector<Type*>;
+    parameter_declaration(arr);
+    while (consume(","))
+    {
+        parameter_declaration(arr);
+    }
 }
 
 /*
@@ -174,13 +226,33 @@ parameter_declaration
     : type_specifier declarator
     ;
 */
-
-Node* parameter_declaration()
+void parameter_declaration(std::vector<Type*>* arr)
 {
-    type_specifier();
-    declarator();
+    auto ty = type_specifier();
+    auto t  = declarator();
+    if (t->isArray)
+    {
+        auto nty    = new Type;
+        nty->size   = 8;
+        nty->ty     = VarType::PTR;
+        nty->ptr_to = ty;
+        arr->push_back(nty);
+        return;
+    }
+    arr->push_back(ty);
 }
-//
+
+/*
+type_specifier
+    : VOID pointer?
+    | INT pointer?
+    | FLOAT pointer?
+    | char pointer?
+    | double pointer?
+    | bool pointer?
+    | struct-declaration pointer?
+    ;
+*/
 Type* type_specifier()
 {
     auto t = new Type;
@@ -244,6 +316,7 @@ Type* struct_declaration(Type* base)
     if (consume("{"))
     {
         struct_declaration_list(base);
+        addStruct(base, name);
         expect("}");
     }
     else
@@ -258,12 +331,16 @@ Type* struct_declaration(Type* base)
 /*
 struct-declaration-list :
     : declaration_list
-    | struct-declaration-list declaration_list
     ;
 */
-Node* struct_declaration_list(Type* base)
+void struct_declaration_list(Type* base)
 {
     base->members;
+    auto arr = declaration_list();
+    for (auto&& i : *arr)
+    {
+        base->members[i->name] = i->ty;
+    }
 }
 
 /*
@@ -423,13 +500,13 @@ declaration_list
 std::vector<Var*>* declaration_list()
 {
     std::vector<Var*>* arr;
-    arr    = new std::vector<Var*>;
-    auto t = declaration(arr);
+    arr = new std::vector<Var*>;
+    declaration(arr);
     while (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or
            consume("struct"))
     {
         --pos;
-        t = declaration(arr);
+        declaration(arr);
     }
     return arr;
 }
@@ -440,11 +517,27 @@ declaration
     : type_specifier declarator_list ';'
     ;
 */
-Node* declaration(std::vector<Var*>* arr)
+void declaration(std::vector<Var*>* arr)
 {
     auto ty = type_specifier();
     declarator_list(arr);
     expect(";");
+    for (auto&& i : *arr)
+    {
+        if (i->isArray)
+        {
+            auto ty2    = new Type;
+            ty2->ty     = VarType::ARY;
+            ty2->ary_of = ty;
+            ty2->len    = i->arrLen;
+            ty2->size   = ty2->len * ty2->ptr_to->size;
+            i->ty       = ty2;
+        }
+        else
+        {
+            i->ty = ty;
+        }
+    }
 }
 
 /*
@@ -453,9 +546,15 @@ declarator_list
     | declarator_list ',' declarator
     ;
 */
-Node* declarator_list(std::vector<Var*>* arr)
+void declarator_list(std::vector<Var*>* arr)
 {
-    auto t = new Var;
+    auto t = declarator();
+    arr->push_back(t);
+    while (consume(","))
+    {
+        t = declarator();
+        arr->push_back(t);
+    }
 }
 
 //--------------wyd的分割线----------------
@@ -486,8 +585,9 @@ Var* declarator()
     else if (consume("="))
     {
         --pos;
-        declaratorInit();
+        t->data = declaratorInit();
     }
+    return t;
 }
 
 /*

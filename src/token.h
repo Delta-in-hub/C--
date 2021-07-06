@@ -91,6 +91,7 @@ static const std::unordered_map<std::string, std::string> tokenType{
     {"&=", "TK_&="},
     {"^=", "TK_^="},
     {"|=", "TK_|="},
+    {"EOF", "TK_EOF"},
 };
 
 //关键字表
