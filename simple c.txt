@@ -45,7 +45,7 @@ parameter_declaration
     : type_specifier declarator
     ;
 
-declarator
+declarator                -------------------------------------------------------------------------------------------------------------
     : IDENTIFIER declaratorInit
     | IDENTIFIER '[' constant_expression ']'
     ;
@@ -88,7 +88,7 @@ expression
     | expression OR_OP logical_and_expression
     ;
 
-logical_and_expression
+logical_and_expression----------------------------------------------------------------
     : equality_expression
     | logical_and_expression AND_OP equality_expression
     ;
@@ -139,7 +139,7 @@ primary_expression
     | '(' expression ')'
     ;
 
-l_expression
+l_expression         ----------------------------------------------------------------------------------------------------------------------/
         : IDENTIFIER
         | l_expression '[' expression ']' 
         ;

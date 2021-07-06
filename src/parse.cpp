@@ -63,3 +63,102 @@ void addStruct()
 {
     ;
 }
+
+
+
+
+
+
+
+
+
+//张雯越
+/*translation_unit
+    | type_specifier fun_declarator compound_statement  translation_unit?
+    | type_specifier declarator_list ';' translation_unit?
+    ;
+*/
+Node* translation_unit()
+{
+
+}
+
+/*type_specifier
+    : VOID pointer?
+    | INT pointer?
+    | FLOAT pointer?
+    | char pointer?
+    | double pointer?
+    | bool pointer?
+    | struct-declaration pointer?
+    ;
+*/
+Node* type_specifier()
+{
+
+}
+
+
+/*struct-declaration :
+    'struct' IDENTIFIER '{'  struct-declaration-list  '}'                                  ?????????????????????????//
+*/
+Node* struct_declaration()
+{
+
+}
+/*struct-declaration-list :                                                                    左递归
+    : declaration_list 
+    | struct-declaration-list declaration_list
+    ;
+*/    
+Node* struct_eclaration_list()
+{
+
+}
+
+
+/*pointer :
+    | '*' 
+    | '*' pointer
+*/
+Node* pointer()
+{
+
+}
+
+
+/*
+fun_declarator
+    : IDENTIFIER '(' parameter_list ')'
+    | IDENTIFIER '(' ')'
+    ;
+*/
+Node* fun_declarator()
+{
+
+}
+
+
+/*
+parameter_list                                                 左递归
+    : parameter_declaration
+    | parameter_list ',' parameter_declaration
+    ;
+*/
+Node* parameter_list()                   
+{
+
+}
+
+
+
+/*parameter_declaration
+    : type_specifier declarator
+    ;
+*/
+
+Node* parameter_declaration()
+{
+    type_specifier();
+    declarator();
+}
