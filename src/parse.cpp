@@ -12,7 +12,9 @@ void expect(const std::string& tokentype, const std::string& error = "Universal 
         pos++;
         return;
     }
-    errorParse(t, error);
+    std::string s("Expect ");
+    s += tokentype;
+    errorParse(t, s);
 }
 
 //希望当前token类型是tokentype
@@ -46,7 +48,9 @@ void initScope(Env* prev)
 //离开当前作用域
 void exitScope()
 {
-    env = env->prev;
+    auto t = env;
+    env    = env->prev;
+    delete t;
 }
 
 Var* findVar(const std::string& name)
@@ -110,6 +114,7 @@ translation_unit
 Node* translation_unit()
 {
     initScope(nullptr);
+    prog = new Program;
 }
 
 /*
@@ -211,21 +216,24 @@ Type* type_specifier()
 }
 /*
 struct-declaration :
-    'struct' IDENTIFIER? '{'  struct-declaration-list  '}'
+    : 'struct' IDENTIFIER        //声明
+    | 'struct' IDENTIFIER?  '{'  struct-declaration-list  '}'  //定义
 */
 Type* struct_declaration(Type* base)
 {
     expect("struct");
     base->ty = VarType::STRUCT;
+    std::string name;
     if (consume("id"))
     {
         --pos;
-        auto pso = env->structs[std::string(nowToken().start, nowToken().end)];
+        name = std::string(nowToken().start, nowToken().end);
         ++pos;
     }
-    else
+    if (consume("{"))
     {
-        ;
+        struct_declaration_list();
+        expect("}");
     }
 }
 /*
@@ -234,9 +242,9 @@ struct-declaration-list :
     | struct-declaration-list declaration_list
     ;
 */
-Node* struct_declaration_list()
+Node* struct_declaration_list(Type* base)
 {
-    ;
+    base->members;
 }
 
 /*
@@ -431,7 +439,9 @@ declaration
 */
 Node* declaration()
 {
-    ;
+    auto ty = type_specifier();
+    declarator_list(ty);
+    expect(";");
 }
 
 /*
@@ -440,17 +450,30 @@ declarator_list
     | declarator_list ',' declarator
     ;
 */
-Node* declarator_list()
+Node* declarator_list(Type* base)
 {
     ;
 }
 
 //--------------wyd的分割线----------------
 
+/*
+declarator
+   : IDENTIFIER declaratorInit
+   | IDENTIFIER '[' constant_expression ']'
+   ;
+*/
+Node* declarator()
+{
+    ;
+}
+
 /*declarator
    : IDENTIFIER declaratorInit
    | IDENTIFIER '[' constant_expression ']'
    ;
+
+
 
 declaratorInit
    : '=' expression

@@ -19,7 +19,8 @@ type_specifier
     ;
 
 struct-declaration :
-    'struct' IDENTIFIER '{'  struct-declaration-list  '}'
+    : 'struct' IDENTIFIER        //声明
+    | 'struct' IDENTIFIER? '{'  struct-declaration-list  '}'  //定义
 
 struct-declaration-list :
     : declaration_list

@@ -53,7 +53,7 @@ enum NodeType
 {
     ND_NUM,       // Number literal
     ND_STRUCT,    // Struct
-    ND_DECL,      // declaration
+   // ND_DECL,      // declaration
     ND_VARDEF,    // Variable definition
     ND_VARREF,    // Variable reference
     ND_IF,        // "if"
