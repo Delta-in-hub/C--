@@ -30,9 +30,9 @@ bool consume(const std::string& tokentype)
     return true;
 }
 
-Token& nowToken()
+Token& nowToken(int p = 0)
 {
-    return tokenArr.at(pos);
+    return tokenArr.at(pos + p);
 }
 /*
 节点相关
@@ -149,8 +149,6 @@ type_specifier
     ;
 */
 
-
-
 /*
 fun_declarator
     : IDENTIFIER '(' parameter_list ')'
@@ -162,7 +160,6 @@ Type* fun_declarator(Type* base)
    
 }
 
-
 /*
 parameter_list
     : parameter_declaration
@@ -171,10 +168,7 @@ parameter_list
 */
 Node* parameter_list()
 {
-
 }
-
-
 
 /*
 parameter_declaration
@@ -293,11 +287,6 @@ Type* pointer(Type* base)
     return t;
 }
 
-
-Node* expression()
-{
-    ;
-}
 
 /*
 l_expression
@@ -437,13 +426,14 @@ std::vector<Var*>* declaration_list()
 {
     std::vector<Var*>* arr;
     arr    = new std::vector<Var*>;
-    auto t = declaration();
+    auto t = declaration(arr);
     while (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or
            consume("struct"))
     {
         --pos;
-        t = declaration();
+        t = declaration(arr);
     }
+    return arr;
 }
 
 /*
@@ -452,10 +442,10 @@ declaration
     : type_specifier declarator_list ';'
     ;
 */
-Node* declaration()
+Node* declaration(std::vector<Var*>* arr)
 {
     auto ty = type_specifier();
-    declarator_list(ty);
+    declarator_list(arr);
     expect(";");
 }
 
@@ -465,9 +455,9 @@ declarator_list
     | declarator_list ',' declarator
     ;
 */
-Node* declarator_list(Type* base)
+Node* declarator_list(std::vector<Var*>* arr)
 {
-    ;
+    auto t = new Var;
 }
 
 //--------------wyd的分割线----------------
@@ -478,11 +468,28 @@ declarator
    | IDENTIFIER '[' constant_expression ']'
    ;
 */
-Node* declarator()
+Var* declarator()
 {
-    Node* t = newNode();
-    t->type = ND_VARREF;
+    auto t     = new Var;
+    t->name    = std::string(nowToken().start, nowToken().end);
+    t->isArray = false;
     expect("id");
+    if (consume("["))
+    {
+        t->isArray = true;
+        auto tmp   = constant_expression();
+        if (tmp->type == ND_DNUM)
+        {
+            errorParse(nowToken(), "Length of array can not be float number");
+        }
+        t->arrLen = tmp->val;
+        expect("]");
+    }
+    else if (consume("="))
+    {
+        --pos;
+        declaratorInit();
+    }
 }
 
 /*
@@ -491,29 +498,31 @@ declaratorInit
 */
 Node* declaratorInit()
 {
-    auto t = newNode();
-    t->type = ND_ASSIGN;
     expect("=");
-    t->rhs = expression();
-    return t;
+    return expression();
 }
 
 /*
 constant_expression
        : INT_CONSTANT
-       : FLOAT_CONSTANT
+       : DOUBLE_CONSTANT
        ;
 */
-Node* constant_expression() {
+Node* constant_expression()
+{
     auto t = newNode();
-    if (consume("int"))
+    if (consume("num"))
     {
         t->type = ND_NUM;
+        t->val  = nowToken(-1).val;
     }
-    else if (consume("float")) {
-        t->type = ND_NUM;
+    else if (consume("dnum"))
+    {
+        t->type = ND_DNUM;
+        t->dval = nowToken(-1).dval;
     }
-    else {
+    else
+    {
         errorParse(nowToken(), "Expect unary_operator");
     }
     return t;
@@ -525,19 +534,21 @@ compound_statement
    | '{' declaration_list statement_list '}'
    ;
 */
-Node* compound_statement() {
+Node* compound_statement()
+{
     auto t = newNode();
     expect("{");
-    if (consume("return") or consume("{") or consume("if") or consume("while") or consume("for") or consume(";") or consume("id")) {
+    if (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") || consume("id")) {
         statement_list();
         expect("}");
     }
-    else if (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or consume("struct")) {
+    else if (consume("void") || consume("char") || consume("bool") || consume("int") || consume("double") || consume("struct")) {
         declaration_list();
         statement_list();
         expect("}");
     }
-    else {
+    else
+    {
         expect("}");
     }
     return t;
@@ -550,9 +561,10 @@ statement_list
    ;
 */
 
-Node* statement_list() {
+Node* statement_list()
+{
     auto t = statement();
-    while (consume("return") or consume("{") or consume("if") or consume("while") or consume("for") or consume(";") or consume("id")) {
+    while (consume("return")||consume("{") || consume("if") || consume("while") || consume("for") || consume(";") || consume("id")) {
         pos--;
         t = statement();
     }
@@ -567,25 +579,28 @@ statement
    | 'RETURN' expression ';'
    ;
 */
-Node* statement() {
+Node* statement()
+{
     auto t = newNode();
-    if (consume("{")) {
+    if (consume("{"))
+    {
         compound_statement();
     }
-    else if (consume("if")) {
+    else if (consume("if"))
+    {
         selection_statement();
     }
-    else if (consume("while") or consume("for")) {
+    else if (consume("while")||consume("for")) {
         iteration_statement();
     }
-    else if (consume(";") or consume("id")) {
+    else if (consume(";")||consume("id")) {
         assignment_statement();
     }
     else if (consume("return")) {
-        errorParse(nowToken(), "Expect unary_operator");
+        expression();
     }
     else {
-
+        errorParse(nowToken(), "Expect statement");
     }
     return t;
 }
@@ -596,30 +611,117 @@ assignment_statement
    |  l_expression '=' expression ';'
    ;
 */
-Node* assignment_statement() {
+Node* assignment_statement()
+{
     auto t = newNode();
+    if (consume(";")) {
 
+    }
+    else if (consume("id")) {
+        pos--;
+        l_expression();
+        expect("=");
+        expression();
+        expect(";");
+    }
+    else {
+        errorParse(nowToken(), "Expect assignment");
+    }
+    return t;
 }
 
 /*
 expression
    : logical_and_expression
    | expression OR_OP logical_and_expression
-   ;*/
+   ;
+ */
 
+Node* expression(){
+    auto t = logical_and_expression();
+    int flag = 0;
+    while (consume("||")) {
+        auto orll = newNode();
+        orll->type = ND_LOGOR;
+        if (flag == 0) {
+            orll->rhs = logical_and_expression();
+            orll->lhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+        else if (flag == 1) {
+            orll->lhs = logical_and_expression();
+            orll->rhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        } 
+    }
+    return t;
+}
 //--------------wyd的分割线----------------
 //--------------cc的分割线----------------
 /*logical_and_expression
     : equality_expression
     | logical_and_expression AND_OP equality_expression
     ;
-
+*/
+Node* logical_and_expression() {
+    auto t = equality_expression();
+    int flag = 0;
+    while (consume("&&")) {
+        auto orll = newNode();
+        orll->type = ND_LOGAND;
+        if (flag == 0) {
+            orll->rhs = equality_expression();
+            orll->lhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+        else if (flag == 1) {
+            orll->lhs = equality_expression();
+            orll->rhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+    }
+    return t;
+}
+/*
 equality_expression   //等式
     : relational_expression
     | equality_expression EQ_OP relational_expression
     | equality_expression NE_OP relational_expression
     ;
+*/
+Node* equality_expression() {
+    auto t = relational_expression();
+    int flag = 0;
+    while (consume("==")||consume("!=")) {
+        auto orll = newNode();
+        pos--;
+        if (consume("==")) {
+            orll->type = ND_EQ;
+        }
+        else {
+            orll->type = ND_NE;
+        }
+        if (flag == 0) {
+            orll->rhs = relational_expression();
+            orll->lhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+        else if (flag == 1) {
+            orll->lhs = relational_expression();
+            orll->rhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+    }
+    return t;
+}
 
+/*
 relational_expression  //关系表达式
     : additive_expression
     | relational_expression '<' additive_expression
@@ -627,13 +729,79 @@ relational_expression  //关系表达式
     | relational_expression LE_OP additive_expression
     | relational_expression GE_OP additive_expression
     ;
+*/
 
+Node* relational_expression(){
+    auto t = additive_expression();
+    int flag = 0;
+    while (consume("<") || consume(">")|| consume("<=") || consume(">=")) {
+        auto orll = newNode();
+        pos--;
+        if (consume("<")) {
+            orll->type = ND_LESS;
+        }
+        else if(consume(">")){
+            orll->type = ND_GREAD;
+        }
+        else if (consume("<=")) {
+            orll->type = ND_LE;
+        }
+        else if (consume(">=")) {
+            orll->type = ND_GE;
+        }
+        if (flag == 0) {
+            orll->rhs = additive_expression();
+            orll->lhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+        else if (flag == 1) {
+            orll->lhs = additive_expression();
+            orll->rhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+    }
+    return t;
+}
+/*
 additive_expression   //加减
     : multiplicative_expression
     | additive_expression '+' multiplicative_expression
     | additive_expression '-' multiplicative_expression
     ;
+*/
+    
+Node* additive_expression() {
+    auto t = multiplicative_expression();
+    int flag = 0;
+    while (consume("+") || consume("-")) {
+        auto orll = newNode();
+        pos--;
+        if (consume("+")) {
+            orll->type = ND_ADD;
+        }
+        else {
+            orll->type = ND_SUB;
+        }
+        if (flag == 0) {
+            orll->rhs = multiplicative_expression();
+            orll->lhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+        else if (flag == 1) {
+            orll->lhs = multiplicative_expression();
+            orll->rhs = t;
+            t = orll;
+            flag = (flag + 1) % 2;
+        }
+    }
+    return t;
+}
+    
 
+/*
 multiplicative_expression  //乘除
     : unary_expression
     | multiplicative_expression '*' unary_expression
