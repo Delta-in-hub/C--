@@ -58,10 +58,10 @@ void expect(const std::string& tokentype, const std::string& error = "Universal 
 //是,pos++,返回true
 //否,返回false
 //向前展望一个符号
-bool consume(const std::string& tokentype)
+bool consume(const std::string_view& tokentype)
 {
     auto&& t = tokenArr[pos];
-    if (t.type != tokenType.at(tokentype))
+    if (t.type != tokenType.at(std::string(tokentype)))
         return false;
     pos++;
     return true;
@@ -264,7 +264,7 @@ parameter_list
 */
 std::vector<Type*>* parameter_list()
 {
-    std::vector<Type*>* arr = new std::vector<Type*>;
+    std::vector<Type*>* arr = new std::vector<Type*>{};
     parameter_declaration(arr);
     while (consume(","))
     {
