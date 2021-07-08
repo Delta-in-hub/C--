@@ -2,6 +2,41 @@
 
 static int pos = 0; // tokenArr pos
 
+Node* translation_unit();
+Node* fun_declarator();
+std::vector<Type*>* parameter_list();
+void parameter_declaration(std::vector<Type*>* arr);
+Type* type_specifier();
+Type* struct_declaration(Type* base);
+void struct_declaration_list(Type* base);
+Type* pointer(Type* base);
+
+Node* l_expression();
+std::vector<Node*>* expression_list();
+Node* unary_operator();
+Node* selection_statement();
+Node* iteration_statement();
+std::vector<Var*>* declaration_list();
+void declaration(std::vector<Var*>* arr);
+void declarator_list(std::vector<Var*>* arr);
+
+Var* declarator();
+Node* declaratorInit();
+Node* constant_expression();
+Node* compound_statement();
+Node* statement_list();
+Node* statement();
+Node* assignment_statement();
+Node* expression();
+
+Node* logical_and_expression();
+Node* equality_expression();
+Node* relational_expression();
+Node* additive_expression();
+Node* multiplicative_expression();
+Node* unary_expression();
+Node* postfix_expression();
+Node* primary_expression();
 //希望当前token类型是tokentype
 //否的话,直接报错,结束程序
 void expect(const std::string& tokentype, const std::string& error = "Universal Error")
@@ -115,8 +150,9 @@ void addStruct(Type* ty, const std::string& name)
     }
 }
 
-Var* findVar(const std::string& name);
-Type* struct_declaration(Type* base);
+//Var* findVar(const std::string& name);
+//Type* struct_declaration(Type* base);
+
 
 /*
 递归下降
