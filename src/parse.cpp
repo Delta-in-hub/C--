@@ -264,7 +264,7 @@ parameter_list
 */
 std::vector<Type*>* parameter_list()
 {
-    std::vector<Type*>* arr = new std::vector<Type*>;
+    std::vector<Type*>* arr = new std::vector<Type*>{};
     parameter_declaration(arr);
     while (consume(","))
     {
@@ -284,7 +284,7 @@ void parameter_declaration(std::vector<Type*>* arr)
     auto t  = declarator();
     if (t->isArray)
     {
-        auto nty    = new Type;
+        auto nty    = new Type{};
         nty->size   = 8;
         nty->ty     = VarType::PTR;
         nty->ptr_to = ty;
@@ -307,7 +307,7 @@ type_specifier
 */
 Type* type_specifier()
 {
-    auto t = new Type;
+    auto t = new Type{};
     if (consume("void"))
     {
         t->ty   = VarType::VOID;
@@ -403,7 +403,7 @@ pointer :
 Type* pointer(Type* base)
 {
     expect("*");
-    auto t    = new Type;
+    auto t    = new Type{};
     t->size   = 8;
     t->ty     = VarType::PTR;
     t->ptr_to = base;
@@ -468,7 +468,7 @@ expression_list
 */
 std::vector<Node*>* expression_list()
 {
-    auto v = new std::vector<Node*>;
+    auto v = new std::vector<Node*>{};
     auto t = expression();
     v->push_back(t);
     while (consume(","))
@@ -573,7 +573,7 @@ declaration_list
 std::vector<Var*>* declaration_list()
 {
     std::vector<Var*>* arr;
-    arr = new std::vector<Var*>;
+    arr = new std::vector<Var*>{};
     declaration(arr);
     while (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or
            consume("struct"))
@@ -599,7 +599,7 @@ void declaration(std::vector<Var*>* arr)
     {
         if (i->isArray)
         {
-            auto ty2    = new Type;
+            auto ty2    = new Type{};
             ty2->ty     = VarType::ARY;
             ty2->ary_of = ty;
             ty2->len    = i->arrLen;
@@ -640,7 +640,7 @@ declarator
 */
 Var* declarator()
 {
-    auto t     = new Var;
+    auto t     = new Var{};
     t->name    = std::string(nowToken().start, nowToken().end);
     t->isArray = false;
     expect("id");
@@ -747,7 +747,7 @@ statement_list
 
 std::vector<Node*>* statement_list()
 {
-    auto v = new std::vector<Node*>;
+    auto v = new std::vector<Node*>{};
     auto t = statement();
     v->push_back(t);
     while (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") ||
@@ -1117,7 +1117,7 @@ Node* postfix_expression()
         consume("(");
         if (consume(")"))
         {
-            t->args = new std::vector<Node*>;
+            t->args = new std::vector<Node*>{};
         }
         else
         {
