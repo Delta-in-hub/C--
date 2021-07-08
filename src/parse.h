@@ -12,7 +12,7 @@ struct Env
     // Map* tags; //结构体
     std::unordered_map<std::string, Type*> structs;
     struct Env* prev;
-}* env = nullptr;
+}* env = nullptr, *global = nullptr;
 
 enum VarType
 {
@@ -53,6 +53,7 @@ enum NodeType
 {
     ND_NUM,       // Number literal 常量
     ND_DNUM,      // Double Number literal 浮点常量
+    ND_STR,         //String literal
     ND_STRUCT,    // Struct 结构体
                   // ND_DECL,      // declaration
     ND_VARDEF,    // Variable definition 变量定义
@@ -62,6 +63,7 @@ enum NodeType
     ND_DO_WHILE,  // do ... while
     ND_ADDR,      // address-of operator ("&")
     ND_DEREF,     // pointer dereference ("*")  数组
+    ND_ARRDEREF,  // array dereference : arr[10]
     ND_DOT,       // Struct member access
     ND_EQ,        // ==
     ND_NE,        // !=
@@ -122,7 +124,7 @@ struct Node
     int val; // Number literal
     double dval;
     Node* expresson; // expresson  类似  1+2  3  fun(a) 见 https://zh.cppreference.com/w/c/language/expressions
-    std::vector<Node*>* statement; // Compound statement
+    std::vector<Node*>* statementList; // Compound statement
 
     // "if" ( cond ) then "else" els
     // "for" ( init; cond; inc ) body

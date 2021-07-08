@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "token.h"
+#include "parse.h"
 #include <iostream>
 #include <string>
 using namespace std;
@@ -10,7 +11,7 @@ int main(void)
     // string st        = "???????��????";
     path     = "../in.txt";
     str      = openFile(path);
-    buferror = str; //for parse error process
+    buferror = str; // for parse error process
     scan(str);
     for (auto&& i : tokenArr)
     {

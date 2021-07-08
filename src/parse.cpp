@@ -34,6 +34,12 @@ Token& nowToken(int p = 0)
 {
     return tokenArr.at(pos + p);
 }
+
+std::string nowName(int p = 0)
+{
+    return std::string(nowToken(p).start, nowToken(p).end);
+}
+
 /*
 节点相关
 */
@@ -125,7 +131,8 @@ Type* struct_declaration(Type* base);
 void parse()
 {
     initScope(nullptr);
-    prog = new Program;
+    global = env;
+    prog   = new Program;
     while (nowToken().type != "TK_EOF")
     {
         translation_unit();
@@ -152,6 +159,12 @@ Node* translation_unit()
         fun->ctype  = t;
         f->name     = fun->name;
         f->info     = fun;
+        auto nv     = new Var;
+        nv->name    = fun->name;
+        auto ny     = new Type;
+        ny->ty      = FUNC;
+        nv->ty      = ny;
+        addVar(nv);
         f->compound = compound_statement();
         prog->funcs.push_back(f);
     }
@@ -168,7 +181,7 @@ Node* translation_unit()
                 ty2->ty     = VarType::ARY;
                 ty2->ary_of = t;
                 ty2->len    = i->arrLen;
-                ty2->size   = ty2->len * ty2->ptr_to->size;
+                ty2->size   = ty2->len * (ty2->ptr_to->size);
                 i->ty       = ty2;
             }
             else
@@ -313,13 +326,13 @@ Type* struct_declaration(Type* base)
         name = std::string(nowToken().start, nowToken().end);
         ++pos;
     }
-    if (consume("{"))
+    if (consume("{")) //定义
     {
         struct_declaration_list(base);
         addStruct(base, name);
         expect("}");
     }
-    else
+    else //声明
     {
         if (name.empty())
             errorParse(nowToken(), "Expect struct name");
@@ -367,17 +380,37 @@ Type* pointer(Type* base)
 l_expression
         : IDENTIFIER
         | IDENTIFIER '[' expression ']'
+        | IDENTIFIER '.' IDENTIFIER
+        | * l_expression
         ;
 */
 Node* l_expression()
 {
+    if (consume("*"))
+    {
+        auto t  = newNode();
+        t->type = NodeType::ND_DEREF;
+        t->lhs  = l_expression();
+        return t;
+    }
     Node* t = newNode();
     t->type = ND_VARREF;
+    std::string name(nowToken().start, nowToken().end);
     expect("id");
     if (consume("["))
     {
+        t->var       = findVar(t->name);
         t->expresson = expression();
         expect("]");
+        t->type = ND_ARRDEREF;
+    }
+    else if (consume("."))
+    {
+        t->type = ND_DOT;
+        t->var  = findVar(name);
+        std::string name2(nowToken().start, nowToken().end);
+        expect("id");
+        t->name = name2;
     }
     else
     {
@@ -492,6 +525,7 @@ Node* iteration_statement()
 }
 
 /*
+返回包含所有变量的vector
 declaration_list
     : declaration
     | declaration_list declaration
@@ -512,7 +546,7 @@ std::vector<Var*>* declaration_list()
 }
 
 /*
-//变量
+变量定义
 declaration
     : type_specifier declarator_list ';'
     ;
@@ -634,25 +668,34 @@ compound_statement
 */
 Node* compound_statement()
 {
-    auto t = newNode();
     expect("{");
+    initScope(env);
+    auto t  = newNode();
+    t->type = ND_COMP_STMT;
     if (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") ||
         consume("id"))
     {
-        statement_list();
+        --pos;
+        t->statementList = statement_list();
         expect("}");
     }
     else if (consume("void") || consume("char") || consume("bool") || consume("int") || consume("double") ||
              consume("struct"))
     {
-        declaration_list();
-        statement_list();
+        --pos;
+        auto decl = declaration_list();
+        for (auto&& i : *decl)
+        {
+            addVar(i);
+        }
+        t->statementList = statement_list();
         expect("}");
     }
     else
     {
         expect("}");
     }
+    exitScope();
     return t;
 }
 
@@ -663,16 +706,19 @@ statement_list
    ;
 */
 
-Node* statement_list()
+std::vector<Node*>* statement_list()
 {
+    auto v = new std::vector<Node*>;
     auto t = statement();
+    v->push_back(t);
     while (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") ||
-           consume("id"))
+           consume("id") || consume("*"))
     {
         pos--;
         t = statement();
+        v->push_back(t);
     }
-    return t;
+    return v;
 }
 /*
 statement
@@ -685,32 +731,38 @@ statement
 */
 Node* statement()
 {
-    auto t = newNode();
     if (consume("{"))
     {
-        compound_statement();
+        --pos;
+        return compound_statement();
     }
     else if (consume("if"))
     {
-        selection_statement();
+        --pos;
+        return selection_statement();
     }
     else if (consume("while") || consume("for"))
     {
-        iteration_statement();
+        --pos;
+        return iteration_statement();
     }
     else if (consume(";") || consume("id"))
     {
-        assignment_statement();
+        --pos;
+        return assignment_statement();
     }
     else if (consume("return"))
     {
-        expression();
+        --pos;
+        auto t       = newNode();
+        t->type      = NodeType::ND_RETURN;
+        t->expresson = expression();
+        return t;
     }
     else
     {
         errorParse(nowToken(), "Expect statement");
     }
-    return t;
 }
 
 /*
@@ -721,16 +773,19 @@ assignment_statement
 */
 Node* assignment_statement()
 {
-    auto t = newNode();
+    auto t  = newNode();
+    t->type = ND_ASSIGN;
     if (consume(";"))
     {
+        t->type      = NodeType::ND_EXPR_STMT;
+        t->expresson = nullptr; //表示空语句
     }
-    else if (consume("id"))
+    else if (consume("id") or consume("*"))
     {
         pos--;
-        l_expression();
+        t->lhs = l_expression();
         expect("=");
-        expression();
+        t->rhs = expression();
         expect(";");
     }
     else
@@ -987,18 +1042,17 @@ unary_expression     //一元操作符
 
 Node* unary_expression()
 {
-    auto t = newNode();
     if (consume("*") or consume("-") or consume("!"))
     {
         pos--;
-        t      = unary_operator();
+        auto t = unary_operator();
         t->lhs = postfix_expression();
+        return t;
     }
     else
     {
-        t = postfix_expression();
+        return postfix_expression();
     }
-    return t;
 }
 /*
 postfix_expression
@@ -1009,50 +1063,33 @@ postfix_expression
 */
 Node* postfix_expression()
 {
-    auto t = newNode();
-    if (consume("id"))
+    if (nowToken().type == tokenType.at("id") and nowToken(1).type == tokenType.at("("))
     {
-        if (consume("("))
+        auto t    = newNode();
+        t->type   = ND_CALL;
+        auto name = nowName();
+        auto f    = findVar(name);
+        if (f->ty->ty != FUNC)
         {
-            if (consume(")"))
-            {
-                // t->type=?
-                t->expresson = NULL;
-            }
-            else
-            {
-                // t->type=?
-                // t->expresson_list = expression_list();
-            }
+            errorParse(nowToken(), "undefined function name");
+        }
+        consume("id");
+        consume("(");
+        if (consume(")"))
+        {
+            t->args = new std::vector<Node*>;
         }
         else
         {
-            if (consume("++") or consume("--"))
-            {
-                pos--;
-                pos--;
-                t->lhs = l_expression();
-                if (consume("++"))
-                {
-                    t->type = ND_INC;
-                }
-                else if (consume("--"))
-                {
-                    t->type = ND_DEC;
-                }
-            }
-            else
-            {
-                pos--;
-                t = primary_expression();
-            }
+            t->args = expression_list();
+            expect(")");
         }
+        return t;
     }
     else
     {
-        t = primary_expression();
+        return primary_expression();
     }
-    return t;
 }
 /*
 primary_expression
@@ -1063,7 +1100,6 @@ primary_expression
     | FLOAT_CONSTANT
     | STRING_LITERAL
     | '(' expression ')'
-    | l_expression '++'/'--'
     ;
 */
 Node* primary_expression()
@@ -1071,20 +1107,28 @@ Node* primary_expression()
     auto t = newNode();
     if (consume("num"))
     {
+        t->type = ND_NUM;
+        t->val  = nowToken(-1).val;
     }
     else if (consume("dnum"))
     {
+        t->type = ND_DNUM;
+        t->dval = nowToken(-1).dval;
     }
     else if (consume("str"))
     {
+        t->type = ND_STR;
+        t->name = nowName(-1);
     }
     else if (consume("("))
     {
+        delete t;
         t = expression();
         expect(")");
     }
     else
     {
+        delete t;
         t = l_expression();
         if (consume("="))
         {

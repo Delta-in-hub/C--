@@ -1,6 +1,7 @@
-#ifndef TOEKN_
-    #define TOKEN_
-    #include "stdafx.h"
+#ifndef TOKEN_
+#define TOKEN_
+
+#include "stdafx.h"
 
 /// token.c
 static const std::unordered_map<std::string, std::string> tokenType{
