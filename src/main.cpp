@@ -7,7 +7,7 @@ using namespace std;
 int main(void)
 {
 
-    char* str;
+    const char* str;
     // string st        = "???????��????";
     path     = "../in.txt";
     str      = openFile(path);
@@ -24,7 +24,7 @@ int main(void)
             cout << i.type << ' ' << string(i.start, i.end) << endl;
         }
     }
-
+    parse();
     getchar();
     return 0;
 }

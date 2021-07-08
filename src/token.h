@@ -110,13 +110,13 @@ static std::vector<std::string> escape{"\\n", "\\t", "\\\"", "\\\'", "\\\\"};
 struct Token
 {
     std::string type;
-    char *start, *end; // TokenName   start是首指针,end是尾后指针
+    const char *start, *end; // TokenName   start是首指针,end是尾后指针
     int val;           //数字,字符常量
     double dval;       //浮点数常量
 };
 
 extern std::vector<Token> tokenArr;
-extern char* path;
+extern const char* path;
 
 /*
 从path中读文件,返回字符串
@@ -130,7 +130,7 @@ char* openFile(const char* path);
 分割出token, push_back到tokenArr
 */
 
-void scan(char* buf);
+void scan(const char* buf);
 
 /*
 TOKEN 错误处理
@@ -140,9 +140,9 @@ token起止start,end
 -----
 要输出行数,以及那行的内容,指出位置
 */
-void errorToken(char* buf, char* start, char* end, const char* path, std::string msg);
+void errorToken(const char* buf, const char* start, const char* end, const char* path, std::string msg);
 
-extern char* buferror;
-void errorParse(const Token& tk, const std::string& error = "Universal Error");
+extern const char* buferror;
+void errorParse(const Token& tk, const std::string& error);
 
 #endif

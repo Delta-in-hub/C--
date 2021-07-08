@@ -1,8 +1,10 @@
 #include "parse.h"
 
 static int pos = 0; // tokenArr pos
+Program* prog  = nullptr;
+Env *env = nullptr, *global = nullptr;
 
-Node* translation_unit();
+void translation_unit();
 Node* fun_declarator();
 std::vector<Type*>* parameter_list();
 void parameter_declaration(std::vector<Type*>* arr);
@@ -82,7 +84,7 @@ std::string nowName(int p = 0)
 //进入新的作用域
 void initScope(Env* prev)
 {
-    env       = new Env;
+    env       = new Env{};
     env->prev = prev;
 }
 
@@ -127,9 +129,10 @@ Type* findStruct(const std::string& name)
 
 Node* newNode()
 {
-    auto t   = new Node;
+    auto t   = new Node{};
     t->name  = std::string(nowToken().start, nowToken().end);
     t->token = &nowToken();
+    return t;
 }
 
 void addVar(Var* v)
@@ -156,9 +159,8 @@ void addStruct(Type* ty, const std::string& name)
     }
 }
 
-//Var* findVar(const std::string& name);
-//Type* struct_declaration(Type* base);
-
+// Var* findVar(const std::string& name);
+// Type* struct_declaration(Type* base);
 
 /*
 递归下降
@@ -168,7 +170,7 @@ void parse()
 {
     initScope(nullptr);
     global = env;
-    prog   = new Program;
+    prog   = new Program{};
     while (nowToken().type != "TK_EOF")
     {
         translation_unit();
@@ -181,7 +183,7 @@ translation_unit
     | type_specifier declarator_list ';'
     ;
 */
-Node* translation_unit()
+void translation_unit()
 {
     auto t = type_specifier();
     if (nowToken().type != tokenType.at("id"))
@@ -190,14 +192,14 @@ Node* translation_unit()
     }
     if (nowToken(1).type == tokenType.at("("))
     {
-        Function* f = new Function;
+        Function* f = new Function{};
         auto fun    = fun_declarator();
         fun->ctype  = t;
         f->name     = fun->name;
         f->info     = fun;
-        auto nv     = new Var;
+        auto nv     = new Var{};
         nv->name    = fun->name;
-        auto ny     = new Type;
+        auto ny     = new Type{};
         ny->ty      = FUNC;
         nv->ty      = ny;
         addVar(nv);
@@ -206,14 +208,14 @@ Node* translation_unit()
     }
     else
     {
-        std::vector<Var*>* arr = new std::vector<Var*>;
+        std::vector<Var*>* arr = new std::vector<Var*>{};
         declarator_list(arr);
         expect(";");
         for (auto&& i : *arr)
         {
             if (i->isArray)
             {
-                auto ty2    = new Type;
+                auto ty2    = new Type{};
                 ty2->ty     = VarType::ARY;
                 ty2->ary_of = t;
                 ty2->len    = i->arrLen;
@@ -245,7 +247,7 @@ Node* fun_declarator()
     expect("(");
     if (consume(")"))
     {
-        t->params = new std::vector<Type*>;
+        t->params = new std::vector<Type*>{};
     }
     else
     {
@@ -268,6 +270,7 @@ std::vector<Type*>* parameter_list()
     {
         parameter_declaration(arr);
     }
+    return arr;
 }
 
 /*
@@ -799,6 +802,7 @@ Node* statement()
     {
         errorParse(nowToken(), "Expect statement");
     }
+    return nullptr;
 }
 
 /*

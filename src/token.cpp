@@ -3,7 +3,8 @@
 using namespace std;
 
 std::vector<Token> tokenArr;
-char* path = nullptr;
+const char* path = nullptr;
+const char* buferror;
 
 static inline void sortSymbolArr()
 {
@@ -26,7 +27,7 @@ void errorToken(char* buf, char* start, char* end, std::string msg);
 {}
 */
 
-void scan(char* buf)
+void scan(const char* buf)
 {
 
     int i = 0, len, tlen = 0;
@@ -274,11 +275,11 @@ char* openFile(const char* path)
     return buf;
 }
 
-void errorToken(char* buf, char* start, char* end, const char* path, std::string msg)
+void errorToken(const char* buf, const char* start, const char* end, const char* path, std::string msg)
 {
-    char* s  = buf;
+    const char* s = buf;
     int line = 0, col = 0;
-    for (char* p = buf; p; p++)
+    for (const char* p = buf; p; p++)
     {
         if (*p == '\n')
         {

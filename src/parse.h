@@ -3,17 +3,6 @@
 #include "stdafx.h"
 #include "token.h"
 
-struct Env
-{
-    // Map* vars; //变量
-    std::unordered_map<std::string, Var*> vars;
-    // Map* typedefs; //
-    std::unordered_map<std::string, Type*> typedefs;
-    // Map* tags; //结构体
-    std::unordered_map<std::string, Type*> structs;
-    struct Env* prev;
-}* env = nullptr, *global = nullptr;
-
 enum VarType
 {
     VOID,
@@ -27,33 +16,11 @@ enum VarType
     FUNC,
 };
 
-struct Type
-{
-    VarType ty; // VarType
-    int size;   // sizeof     bool/char 1     int 4  double 8   void* 8
-    // int align; // alignof
-
-    // Pointer
-    Type* ptr_to;
-
-    // Array
-    Type* ary_of;
-    int len;
-
-    // Struct
-    // Map* members;
-    std::unordered_map<std::string, Type*> members;
-    int offset;
-
-    // Function
-    Type* returning;
-};
-
 enum NodeType
 {
     ND_NUM,       // Number literal 常量
     ND_DNUM,      // Double Number literal 浮点常量
-    ND_STR,         //String literal
+    ND_STR,       // String literal
     ND_STRUCT,    // Struct 结构体
                   // ND_DECL,      // declaration
     ND_VARDEF,    // Variable definition 变量定义
@@ -92,7 +59,30 @@ enum NodeType
     ND_DEC        // --
 };
 
+struct Type
+{
+    VarType ty; // VarType
+    int size;   // sizeof     bool/char 1     int 4  double 8   void* 8
+    // int align; // alignof
+
+    // Pointer
+    Type* ptr_to;
+
+    // Array
+    Type* ary_of;
+    int len;
+
+    // Struct
+    // Map* members;
+    std::unordered_map<std::string, Type*> members;
+    int offset;
+
+    // Function
+    Type* returning;
+};
+
 // Represents a variable.
+struct Node;
 struct Var
 {
     Type* ty;
@@ -173,5 +163,23 @@ struct Program
     std::vector<Var*> gvars;
     // Vector* funcs;
     std::vector<Function*> funcs;
-} * prog;
+};
+
+extern Program* prog;
+
+struct Env
+{
+    // Map* vars; //变量
+    std::unordered_map<std::string, Var*> vars;
+    // Map* typedefs; //
+    std::unordered_map<std::string, Type*> typedefs;
+    // Map* tags; //结构体
+    std::unordered_map<std::string, Type*> structs;
+    struct Env* prev;
+};
+
+extern Env *env, *global;
+
+void parse();
+
 #endif
