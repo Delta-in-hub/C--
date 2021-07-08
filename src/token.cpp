@@ -176,12 +176,12 @@ void scan(const char* buf)
         else
         {
             int j = i;
-            while (isdigit(s[j]) or isalpha(s[j]) or s[j] == '_' and j < len - 1)
+            while (isdigit(s[j]) or isalpha(s[j]) or s[j] == '_' and j <= len - 1)
             {
                 j++;
             }
-            if (j < len - 1)
-                j--;
+            // if (j < len - 1)
+            j--;
             tlen = j - i + 1;
             string temp;
             if (tlen > 0)
@@ -220,32 +220,6 @@ void scan(const char* buf)
                 {
                     errorToken(buf, buf + i, buf + j + 1, path, "标识符格式错误");
                 }
-                /*
-                // ! bug  );
-                if (j < len - 1)
-                    j++;
-                while (!(isdigit(s[j]) or isalpha(s[j]) or s[j] == '_') and j < len - 1 and s[j] != '\n' and
-                       s[j] != ' ')
-                {
-                    j++;
-                }
-                if (j < len - 1)
-                    j--;
-                tlen      = j - i + 1;
-                temp      = s.substr(i, tlen);
-                auto iter = symbols.find(temp);
-                //错误
-                if (iter == symbols.end())
-                {
-                    errorToken(buf, buf + i, buf + j + 1, path, "标识符格式错误");
-                }
-                // symbols
-                else
-                {
-                    struct Token t = {tokenType.at(temp), buf + i, buf + j + 1, 0, 0};
-                    tokenArr.push_back(move(t));
-                }
-                */
             }
         }
         i += tlen;

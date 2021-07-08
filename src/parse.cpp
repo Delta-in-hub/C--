@@ -58,10 +58,10 @@ void expect(const std::string& tokentype, const std::string& error = "Universal 
 //是,pos++,返回true
 //否,返回false
 //向前展望一个符号
-bool consume(const std::string_view& tokentype)
+bool consume(const std::string& tokentype)
 {
     auto&& t = tokenArr[pos];
-    if (t.type != tokenType.at(std::string(tokentype)))
+    if (t.type != tokenType.at(tokentype))
         return false;
     pos++;
     return true;
@@ -175,6 +175,7 @@ void parse()
     {
         translation_unit();
     }
+    std::cout << "Parse done" << std::endl;
 }
 
 /*
@@ -240,7 +241,8 @@ fun_declarator
 */
 Node* fun_declarator()
 {
-    auto t = newNode();
+    auto t  = newNode();
+    t->type = ND_FUNC;
     std::string name(nowToken().start, nowToken().end);
     t->name = name;
     expect("id");
@@ -328,7 +330,7 @@ Type* type_specifier()
         t->ty   = VarType::CHAR;
         t->size = 1;
     }
-    else if (consume("bool"))
+    else if (consume("_Bool"))
     {
         t->ty   = VarType::BOOL;
         t->size = 1;
@@ -575,7 +577,7 @@ std::vector<Var*>* declaration_list()
     std::vector<Var*>* arr;
     arr = new std::vector<Var*>{};
     declaration(arr);
-    while (consume("void") or consume("char") or consume("bool") or consume("int") or consume("double") or
+    while (consume("void") or consume("char") or consume("_Bool") or consume("int") or consume("double") or
            consume("struct"))
     {
         --pos;
@@ -711,28 +713,25 @@ Node* compound_statement()
     initScope(env);
     auto t  = newNode();
     t->type = ND_COMP_STMT;
-    if (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") ||
-        consume("id"))
+    while (not consume("}"))
     {
-        --pos;
-        t->statementList = statement_list();
-        expect("}");
-    }
-    else if (consume("void") || consume("char") || consume("bool") || consume("int") || consume("double") ||
-             consume("struct"))
-    {
-        --pos;
-        auto decl = declaration_list();
-        for (auto&& i : *decl)
+        if (consume("return") || consume("{") || consume("if") || consume("while") || consume("for") || consume(";") ||
+            consume("id") || consume("*"))
         {
-            addVar(i);
+            --pos;
+            t->statementList = statement_list();
         }
-        t->statementList = statement_list();
-        expect("}");
-    }
-    else
-    {
-        expect("}");
+        else if (consume("void") || consume("char") || consume("_Bool") || consume("int") || consume("double") ||
+                 consume("struct"))
+        {
+            --pos;
+            auto decl = declaration_list();
+            for (auto&& i : *decl)
+            {
+                addVar(i);
+            }
+            t->statementList = statement_list();
+        }
     }
     exitScope();
     return t;
@@ -785,7 +784,7 @@ Node* statement()
         --pos;
         return iteration_statement();
     }
-    else if (consume(";") || consume("id"))
+    else if (consume(";") || consume("id") || consume("*"))
     {
         --pos;
         return assignment_statement();
