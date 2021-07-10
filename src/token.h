@@ -20,7 +20,7 @@ static const std::unordered_map<std::string, std::string> tokenType{
     {"short", "TK_SHORT"},
     {"int", "TK_INT"},
     {"long", "TK_LONG"},
-    {"float", "TK_FLOAT"},
+    {"float", "TK_DOUBLE"}, //flaot same to double
     {"double", "TK_DOUBLE"},
     {"signed", "TK_SIGNED"},
     {"unsigned", "TK_UNSIGNED"},
@@ -111,12 +111,9 @@ struct Token
 {
     std::string type;
     const char *start, *end; // TokenName   start是首指针,end是尾后指针
-    int val;           //数字,字符常量
-    double dval;       //浮点数常量
+    int val;                 //数字,字符常量
+    double dval;             //浮点数常量
 };
-
-extern std::vector<Token> tokenArr;
-extern const char* path;
 
 /*
 从path中读文件,返回字符串
@@ -142,7 +139,12 @@ token起止start,end
 */
 void errorToken(const char* buf, const char* start, const char* end, const char* path, std::string msg);
 
-extern const char* buferror;
 void errorParse(const Token& tk, const std::string& error);
 
+/*
+全局变量
+*/
+extern const char* buferror;
+extern std::vector<Token> tokenArr;
+extern const char* path;
 #endif

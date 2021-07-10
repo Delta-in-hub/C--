@@ -43,6 +43,21 @@ Node* primary_expression();
 //否的话,直接报错,结束程序
 void expect(const std::string& tokentype, const std::string& error = "Universal Error")
 {
+#ifdef DEBUG__
+    if (not(pos >= 0 and pos < tokenArr.size()))
+    {
+        std::printf("%d out of range of TokenArr");
+        getchar();
+        exit(1);
+    }
+    if (tokenType.find(tokentype) == tokenType.end())
+    {
+        std::printf("%s does not in tokenType unordreed map", tokentype.c_str());
+        getchar();
+        exit(1);
+    }
+#endif
+
     auto&& t = tokenArr[pos];
     if (t.type == tokenType.at(tokentype))
     {
@@ -50,7 +65,7 @@ void expect(const std::string& tokentype, const std::string& error = "Universal 
         return;
     }
     std::string s("Expect ");
-    s += tokenType.at(tokentype);
+    s += tokentype;
     errorParse(t, s);
 }
 
@@ -60,6 +75,20 @@ void expect(const std::string& tokentype, const std::string& error = "Universal 
 //向前展望一个符号
 bool consume(const std::string& tokentype)
 {
+#ifdef DEBUG__
+    if (not(pos >= 0 and pos < tokenArr.size()))
+    {
+        std::printf("%d out of range of TokenArr");
+        getchar();
+        exit(1);
+    }
+    if (tokenType.find(tokentype) == tokenType.end())
+    {
+        std::printf("%s does not in tokenType unordreed map", tokentype.c_str());
+        getchar();
+        exit(1);
+    }
+#endif
     auto&& t = tokenArr[pos];
     if (t.type != tokenType.at(tokentype))
         return false;
@@ -69,6 +98,14 @@ bool consume(const std::string& tokentype)
 
 Token& nowToken(int p = 0)
 {
+#ifdef DEBUG__
+    if (not(pos + p >= 0 and pos + p < tokenArr.size()))
+    {
+        std::printf("%d out of range of TokenArr");
+        getchar();
+        exit(1);
+    }
+#endif
     return tokenArr.at(pos + p);
 }
 
@@ -127,6 +164,17 @@ Type* findStruct(const std::string& name)
     return nullptr;
 }
 
+Function* findFuncion(const std::string& name)
+{
+    for (auto&& i : prog->funcs)
+    {
+        if (i->name == name)
+            return i;
+    }
+    errorParse(nowToken(), "undefined Function");
+    return nullptr;
+}
+
 Node* newNode()
 {
     auto t   = new Node{};
@@ -139,7 +187,7 @@ void addVar(Var* v)
 {
     if (env->vars.find(v->name) != env->vars.end())
     {
-        errorParse(nowToken(), "Multi Definition");
+        errorParse(nowToken(), "Multi Variable Definition");
     }
     else
     {
@@ -151,7 +199,7 @@ void addStruct(Type* ty, const std::string& name)
 {
     if (env->vars.find(name) != env->vars.end() or env->structs.find(name) != env->structs.end())
     {
-        errorParse(nowToken(), "Multi Definition");
+        errorParse(nowToken(), "Multi Struct Definition");
     }
     else
     {
@@ -175,7 +223,9 @@ void parse()
     {
         translation_unit();
     }
+#ifdef DEBUG__
     std::cout << "Parse done" << std::endl;
+#endif
 }
 
 /*
@@ -193,19 +243,24 @@ void translation_unit()
     }
     if (nowToken(1).type == tokenType.at("("))
     {
-        Function* f = new Function{};
-        auto fun    = fun_declarator();
-        fun->ctype  = t;
-        f->name     = fun->name;
-        f->info     = fun;
-        auto nv     = new Var{};
-        nv->name    = fun->name;
-        auto ny     = new Type{};
-        ny->ty      = FUNC;
-        nv->ty      = ny;
+        Function* f   = new Function{};
+        auto fun      = fun_declarator();
+        f->name       = fun->name;
+        f->params     = fun->params;
+        f->returnType = t;
+
+        /*
+        //变量名视作为变量的一种
+        auto nv  = new Var{};
+        nv->name = fun->name;
+        auto ny  = new Type{};
+        ny->ty   = FUNC;
+        nv->ty   = ny;
         addVar(nv);
+        */
+
+        prog->funcs.push_back(f); // for recursive
         f->compound = compound_statement();
-        prog->funcs.push_back(f);
     }
     else
     {
@@ -220,7 +275,7 @@ void translation_unit()
                 ty2->ty     = VarType::ARY;
                 ty2->ary_of = t;
                 ty2->len    = i->arrLen;
-                ty2->size   = ty2->len * (ty2->ptr_to->size);
+                ty2->size   = i->arrLen * (t->size);
                 i->ty       = ty2;
             }
             else
@@ -234,6 +289,8 @@ void translation_unit()
 }
 
 /*
+返回函数名(形参列表仅类型)
+返回值类型,函数体待填充
 fun_declarator
     : IDENTIFIER '(' parameter_list ')'
     | IDENTIFIER '(' ')'
@@ -241,6 +298,11 @@ fun_declarator
 */
 Node* fun_declarator()
 {
+    /*
+    1.node->type = ND_FUNC
+    2.node->name = funName
+    3.params列表,此时将数组退化为指针Type
+    */
     auto t  = newNode();
     t->type = ND_FUNC;
     std::string name(nowToken().start, nowToken().end);
@@ -338,8 +400,7 @@ Type* type_specifier()
     else if (consume("struct"))
     {
         --pos;
-        t->ty = VarType::STRUCT;
-        t     = struct_declaration(t);
+        t = struct_declaration(t);
     }
     else
         errorParse(nowToken(), "Expect type_specifier");
@@ -358,6 +419,11 @@ struct-declaration :
 */
 Type* struct_declaration(Type* base)
 {
+    /*
+    1.VarType::STRUCT
+    2.填充members
+    3.计算size
+    */
     expect("struct");
     base->ty = VarType::STRUCT;
     std::string name;
@@ -369,6 +435,7 @@ Type* struct_declaration(Type* base)
     }
     if (consume("{")) //定义
     {
+        base->size = 0;
         struct_declaration_list(base);
         addStruct(base, name);
         expect("}");
@@ -389,10 +456,10 @@ struct-declaration-list :
 */
 void struct_declaration_list(Type* base)
 {
-    base->members;
     auto arr = declaration_list();
     for (auto&& i : *arr)
     {
+        base->size += i->size;
         base->members[i->name] = i->ty;
     }
 }
@@ -430,7 +497,7 @@ Node* l_expression()
     if (consume("*"))
     {
         auto t  = newNode();
-        t->type = NodeType::ND_DEREF;
+        t->type = NodeType::ND_DEREF; //类型检查在之后
         t->lhs  = l_expression();
         return t;
     }
@@ -449,8 +516,16 @@ Node* l_expression()
     {
         t->type = ND_DOT;
         t->var  = findVar(name);
+        if (t->var->ty->ty != VarType::STRUCT)
+        {
+            errorParse(nowToken(), name + " is not a struct");
+        }
         std::string name2(nowToken().start, nowToken().end);
         expect("id");
+        if (t->var->ty->members.find(name2) == t->var->ty->members.end())
+        {
+            errorParse(nowToken(), name2 + " is not a member of " + name + " struct");
+        }
         t->name = name2;
     }
     else
@@ -507,7 +582,7 @@ Node* unary_operator()
     }
     else
     {
-        errorParse(nowToken(), "Expect unary_operator");
+        errorParse(nowToken(), "Expect unary operator");
     }
     return n;
 }
@@ -515,6 +590,7 @@ Node* unary_operator()
 /*
 selection_statement
         : IF '(' expression ')' statement ELSE statement
+        | IF '(' expression ')' statement
     ;
 */
 Node* selection_statement()
@@ -526,8 +602,10 @@ Node* selection_statement()
     n->condition = expression();
     expect(")");
     n->then = statement();
-    expect("else");
-    n->els = statement();
+    if (consume("else"))
+    {
+        n->els = statement();
+    }
     return n;
 }
 
@@ -574,8 +652,7 @@ declaration_list
 */
 std::vector<Var*>* declaration_list()
 {
-    std::vector<Var*>* arr;
-    arr = new std::vector<Var*>{};
+    std::vector<Var*>* arr = new std::vector<Var*>{};
     declaration(arr);
     while (consume("void") or consume("char") or consume("_Bool") or consume("int") or consume("double") or
            consume("struct"))
@@ -605,7 +682,7 @@ void declaration(std::vector<Var*>* arr)
             ty2->ty     = VarType::ARY;
             ty2->ary_of = ty;
             ty2->len    = i->arrLen;
-            ty2->size   = ty2->len * ty2->ptr_to->size;
+            ty2->size   = i->arrLen * ty->size;
             i->ty       = ty2;
         }
         else
@@ -616,6 +693,8 @@ void declaration(std::vector<Var*>* arr)
 }
 
 /*
+返回 说明符vector ,其他信息待填充
+仅包含变量名,是否为数组/数组长度,
 declarator_list
     : declarator
     | declarator_list ',' declarator
@@ -738,6 +817,7 @@ Node* compound_statement()
 }
 
 /*
+返回语句的vector
 statement_list
    : statement
    | statement_list statement
@@ -762,7 +842,7 @@ std::vector<Node*>* statement_list()
 statement
    : compound_statement     //作用域嵌套 {{}}
    | selection_statement    // if
-   | iteration_statement	 //while for
+   | iteration_statement     //while for
    | assignment_statement   //赋值,空语句
    | 'RETURN' expression ';'
    ;
@@ -851,10 +931,11 @@ Node* expression()
         orll->type = ND_LOGOR;
         if (flag == 0)
         {
-            orll->rhs = logical_and_expression();
             orll->lhs = t;
+            orll->rhs = logical_and_expression();
             t         = orll;
-            flag      = (flag + 1) % 2;
+            // flag      = (flag + 1) % 2;
+            //涉及到短路求值,运算顺序不能变
         }
         else if (flag == 1)
         {
@@ -883,10 +964,10 @@ Node* logical_and_expression()
         orll->type = ND_LOGAND;
         if (flag == 0)
         {
-            orll->rhs = equality_expression();
             orll->lhs = t;
+            orll->rhs = equality_expression();
             t         = orll;
-            flag      = (flag + 1) % 2;
+            // flag      = (flag + 1) % 2;
         }
         else if (flag == 1)
         {
@@ -923,10 +1004,10 @@ Node* equality_expression()
         }
         if (flag == 0)
         {
-            orll->rhs = relational_expression();
             orll->lhs = t;
+            orll->rhs = relational_expression();
             t         = orll;
-            flag      = (flag + 1) % 2;
+            // flag      = (flag + 1) % 2;
         }
         else if (flag == 1)
         {
@@ -975,10 +1056,10 @@ Node* relational_expression()
         }
         if (flag == 0)
         {
-            orll->rhs = additive_expression();
             orll->lhs = t;
+            orll->rhs = additive_expression();
             t         = orll;
-            flag      = (flag + 1) % 2;
+            // flag      = (flag + 1) % 2;
         }
         else if (flag == 1)
         {
@@ -1107,11 +1188,7 @@ Node* postfix_expression()
         auto t    = newNode();
         t->type   = ND_CALL;
         auto name = nowName();
-        auto f    = findVar(name);
-        if (f->ty->ty != FUNC)
-        {
-            errorParse(nowToken(), "undefined function name");
-        }
+        t->fun    = findFuncion(name);
         consume("id");
         consume("(");
         if (consume(")"))

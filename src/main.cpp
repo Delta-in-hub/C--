@@ -1,6 +1,6 @@
+#include "parse.h"
 #include "stdafx.h"
 #include "token.h"
-#include "parse.h"
 #include <iostream>
 #include <string>
 using namespace std;
@@ -9,7 +9,7 @@ int main(void)
 
     const char* str;
     // string st        = "???????��????";
-    path     = "../in.txt";
+    path     = "../testCase/in.txt";
     str      = openFile(path);
     buferror = str; // for parse error process
     scan(str);

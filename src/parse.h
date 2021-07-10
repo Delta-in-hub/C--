@@ -24,14 +24,14 @@ enum NodeType
     ND_STRUCT,    // Struct 结构体
                   // ND_DECL,      // declaration
     ND_VARDEF,    // Variable definition 变量定义
-    ND_VARREF,    // Variable reference 变量引用
+    ND_VARREF,    // Variable reference 变量引用            var
     ND_IF,        // "if"
     ND_FOR,       // "for"
     ND_DO_WHILE,  // do ... while
     ND_ADDR,      // address-of operator ("&")
-    ND_DEREF,     // pointer dereference ("*")  数组
-    ND_ARRDEREF,  // array dereference : arr[10]
-    ND_DOT,       // Struct member access
+    ND_DEREF,     // pointer dereference ("*")             lhs
+    ND_ARRDEREF,  // array dereference : arr[10]          var expression
+    ND_DOT,       // Struct member access                  var  name
     ND_EQ,        // ==
     ND_NE,        // !=
     ND_LE,        // <=
@@ -75,7 +75,7 @@ struct Type
     // Struct
     // Map* members;
     std::unordered_map<std::string, Type*> members;
-    int offset;
+    // int offset;
 
     // Function
     Type* returning;
@@ -90,14 +90,15 @@ struct Var
 
     bool isArray;
     int arrLen;
-    bool is_local;
-    // Local variables are compiled to offsets from RBP.
-    int offset;
+    int size;
 
+    bool is_local;
     // Global variables are compiled to labels with optional
     // initialized data.
     Node* data;
 };
+
+struct Function;
 
 // AST node
 struct Node
@@ -108,7 +109,7 @@ struct Node
 
     // For ND_VARREF  l_expression
     Var* var;
-    Type* ctype; // C type
+    Type* ctype; // C type   返回值类型
     std::string name;
 
     int val; // Number literal
@@ -140,6 +141,7 @@ struct Node
 
     // Function call  实参(argument)
     std::vector<Node*>* args;
+    Function* fun;
     // Vector* args;
 
     // For error reporting
@@ -148,11 +150,13 @@ struct Node
 
 struct Function
 {
-    Node* info;
-    std::string name;
-    Node* compound;
+    std::string name;           //函数名
+    std::vector<Type*>* params; //形参列表
+    Type* returnType;           //返回值类型
+    Node* compound;             //函数体
+    // Node* info;     //
     // Vector* lvars;
-    std::vector<Var*> lvars;
+    // std::vector<Var*> lvars;
     // Vector* bbs;
 };
 
@@ -165,8 +169,6 @@ struct Program
     std::vector<Function*> funcs;
 };
 
-extern Program* prog;
-
 struct Env
 {
     // Map* vars; //变量
@@ -177,9 +179,12 @@ struct Env
     std::unordered_map<std::string, Type*> structs;
     struct Env* prev;
 };
-
-extern Env *env, *global;
-
 void parse();
+
+/*
+全局变量
+*/
+extern Program* prog;
+extern Env *env, *global;
 
 #endif

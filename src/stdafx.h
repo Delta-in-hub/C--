@@ -2,6 +2,8 @@
 #define STDAFX
 //包含通用的头文件
 
+#define DEBUG__
+
 #include <algorithm>
 #include <ciso646>
 #include <cmath>
@@ -9,9 +11,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctype.h>
+#include <fstream>
 #include <iostream>
 #include <iterator>
-#include <fstream>
 #include <map>
 #include <numeric>
 #include <queue>
