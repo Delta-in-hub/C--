@@ -1,3 +1,6 @@
+/*
+语法/语义分析
+*/
 #ifndef PARSE_
 #define PARSE_
 #include "stdafx.h"
@@ -179,6 +182,7 @@ struct Env
     std::unordered_map<std::string, Type*> structs;
     struct Env* prev;
 };
+
 void parse();
 
 /*

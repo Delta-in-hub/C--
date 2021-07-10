@@ -1,5 +1,4 @@
 #include "token.h"
-#include "string"
 using namespace std;
 
 std::vector<Token> tokenArr;
@@ -15,6 +14,37 @@ static inline bool startsWith(const string_view& s1, const string& s2)
 {
     return s1.substr(0, s2.length()) == s2;
 }
+
+void errorToken(const char* buf, const char* start, const char* end, const char* path, std::string msg)
+{
+    const char* s = buf;
+    int line = 0, col = 0;
+    for (const char* p = buf; p; p++)
+    {
+        if (*p == '\n')
+        {
+            s = p + 1;
+            line++;
+            col = 0;
+            continue;
+        }
+        if (p != start)
+        {
+            col++;
+            continue;
+        }
+        cout << "error\t\t\tfile\t\tline\tcol" << endl;
+        cout << msg << "\t" << path << "\t" << line << "\t" << col << endl;
+        int linelen = strchr(p, '\n') - s;
+        printf("%.*s\n", linelen, s);
+#ifdef DEBUG__
+        getchar();
+#endif
+        exit(1);
+        // return;
+    }
+}
+
 /*
 struct Token
 {
@@ -247,36 +277,6 @@ char* openFile(const char* path)
     }
     // fgets(buf, 100, file);
     return buf;
-}
-
-void errorToken(const char* buf, const char* start, const char* end, const char* path, std::string msg)
-{
-    const char* s = buf;
-    int line = 0, col = 0;
-    for (const char* p = buf; p; p++)
-    {
-        if (*p == '\n')
-        {
-            s = p + 1;
-            line++;
-            col = 0;
-            continue;
-        }
-        if (p != start)
-        {
-            col++;
-            continue;
-        }
-        cout << "error\t\t\tfile\t\tline\tcol" << endl;
-        cout << msg << "\t" << path << "\t" << line << "\t" << col << endl;
-        int linelen = strchr(p, '\n') - s;
-        printf("%.*s\n", linelen, s);
-#ifdef DEBUG__
-        getchar();
-#endif
-        exit(1);
-        // return;
-    }
 }
 
 void errorParse(const Token& tk, const std::string& error = "Universal Error")

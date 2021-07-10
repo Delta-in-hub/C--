@@ -137,7 +137,7 @@ token起止start,end
 -----
 要输出行数,以及那行的内容,指出位置
 */
-void errorToken(const char* buf, const char* start, const char* end, const char* path, std::string msg);
+// void errorToken(const char* buf, const char* start, const char* end, const char* path, std::string msg);
 
 void errorParse(const Token& tk, const std::string& error);
 
