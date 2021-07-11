@@ -1,7 +1,7 @@
 double fun(int a)
 {
     a = 12;
-    return a + 10;  //bug
+    return a + 10.0;  //bug
 }
 
 

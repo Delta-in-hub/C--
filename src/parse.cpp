@@ -306,7 +306,7 @@ bool isMatchType(const Type* ta, const Type* tb)
             return false;
         break;
     case VarType::DOUBLE:
-        if (tb->ty == DOUBLE or tb->ty == INT or tb->ty == CHAR)
+        if (tb->ty == DOUBLE /*or tb->ty == INT or tb->ty == CHAR*/)
             return true;
         else
             return false;
@@ -1171,7 +1171,7 @@ Node* statement()
         t->ctype = t->expresson->ctype;
         if (not isMatchType(prog->funcs.back()->returnType, t->expresson->ctype))
         {
-            errorParse(nowToken(), "Error return type");
+            errorParse(nowToken(-1), "Error return type");
         }
         return t;
     }

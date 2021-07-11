@@ -16,11 +16,11 @@ void outPutToken(bool flag = false)
     {
         if (i.type == "TK_INUM" or i.type == "TK_DNUM")
         {
-            cout << i.type << ' ' << string(i.start, i.end) << ' ' << i.val << ' ' << i.dval << ' ';
+            cout << i.type << ' ' << string(i.start, i.end) << ' ' << i.val << ' ' << i.dval << endl;
         }
         else
         {
-            cout << i.type << ' ' << string(i.start, i.end) << ' ';
+            cout << i.type << ' ' << string(i.start, i.end) << endl;
         }
     }
     cout << endl;
