@@ -209,6 +209,16 @@ void addStruct(Type* ty, const std::string& name)
     }
 }
 
+void addFunction(Function* f)
+{
+    for (auto&& i : prog->funcs)
+    {
+        if (i->name == f->name)
+            errorParse(nowToken(-1), "Multi Function Definition");
+    }
+    prog->funcs.push_back(f);
+}
+
 // ta,tb是否为同一类型
 bool isSameType(const Type* ta, const Type* tb)
 {
@@ -440,7 +450,8 @@ void translation_unit()
         addVar(nv);
         */
         // expect(")");
-        prog->funcs.push_back(f); // for recursive
+        addFunction(f);
+        // prog->funcs.push_back(f); // for recursive
         f->compound = compound_statement();
     }
     else

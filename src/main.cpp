@@ -10,6 +10,8 @@ void outPutToken(bool flag = false)
     if (flag == false)
         return;
     cout << endl;
+    cout << path << endl;
+    cout << endl;
     for (auto&& i : tokenArr)
     {
         if (i.type == "TK_INUM" or i.type == "TK_DNUM")
@@ -52,7 +54,7 @@ int main(void)
 
     const char* str;
     // string st        = "???????��????";
-    path     = "../testCase/in4.txt";
+    path     = "../testCase/in3.txt";
     str      = openFile(path);
     buferror = str; // for parse error process
     scan(str);
