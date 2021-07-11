@@ -9,7 +9,7 @@ int main(void)
 
     const char* str;
     // string st        = "???????��????";
-    path     = "../testCase/in3.txt";
+    path     = "../testCase/in2.txt";
     str      = openFile(path);
     buferror = str; // for parse error process
     scan(str);
