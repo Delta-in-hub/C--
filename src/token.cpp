@@ -15,7 +15,6 @@ static inline bool startsWith(const string_view& s1, const string& s2)
     return s1.substr(0, s2.length()) == s2;
 }
 
-
 /*
 <文件名>:Line 5:6: error: 错误信息
 打印那一行
@@ -39,9 +38,10 @@ void errorToken(const char* buf, const char* start, const char* end, const char*
             col++;
             continue;
         }
-        cout << '<' << path << ">:" << "Line " << line << ':' << col << ": error: " << msg << endl;
-        //cout << "error\t\t\tfile\t\tline\tcol" << endl;
-        //cout << msg << "\t" << path << "\t" << line << "\t" << col << endl;
+        cout << '<' << path << ">:"
+             << "Line " << line << ':' << col << ": error: " << msg << endl;
+        // cout << "error\t\t\tfile\t\tline\tcol" << endl;
+        // cout << msg << "\t" << path << "\t" << line << "\t" << col << endl;
         int linelen = strchr(p, '\n') - s;
         printf("%.*s\n", linelen, s);
 #ifdef DEBUG__
@@ -166,7 +166,7 @@ void scan(const char* buf)
             }
             tlen = temp.length() + 2;
             if (tlen > 4 or tlen < 3) // ! 转义字符   like  len(`\n`) == 4
-                errorToken(buf, buf + i, buf + j + 1, path, "字符常量格式错误");
+                errorToken(buf, buf + i + 1, buf + j, path, "字符常量格式错误");
             else
             {
                 bool flag = true;
@@ -184,7 +184,7 @@ void scan(const char* buf)
                 }
                 if (flag)
                 {
-                    struct Token t = {"TK_CHARLITERAL", buf + i, buf + j + 1, s[j - 1], 0};
+                    struct Token t = {"TK_CHARLITERAL", buf + i + 1, buf + j, s[j - 1], 0};
                     tokenArr.push_back(move(t));
                 }
                 else
@@ -206,7 +206,7 @@ void scan(const char* buf)
                 }
                 temp += s[j];
             }
-            struct Token t = {"TK_STR", buf + i, buf + j + 1, 0, 0};
+            struct Token t = {"TK_STR", buf + i + 1, buf + j, 0, 0};
             tokenArr.push_back(move(t));
             tlen = temp.length() + 2;
         }
