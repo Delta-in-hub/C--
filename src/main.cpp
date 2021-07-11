@@ -42,7 +42,7 @@ void outPutParse(bool flag = false)
     for (auto&& i : prog->funcs)
     {
         printf("%s returnType: %d \n", i->name.c_str(), i->returnType->ty);
-        printf("It has %d params and its address is %p\n", i->params->size(), i->compound);
+        printf("It has %d params and function's address is %p\n", i->params->size(), i->compound);
     }
     cout << endl;
 }
@@ -52,7 +52,7 @@ int main(void)
 
     const char* str;
     // string st        = "???????��????";
-    path     = "../testCase/in3.txt";
+    path     = "../testCase/in4.txt";
     str      = openFile(path);
     buferror = str; // for parse error process
     scan(str);

@@ -1,5 +1,6 @@
 #include "parse.h"
 
+static std::vector<Var*> paraVar;
 static int pos = 0; // tokenArr pos
 Program* prog  = nullptr;
 Env *env = nullptr, *global = nullptr;
@@ -540,10 +541,14 @@ void parameter_declaration(std::vector<Type*>* arr)
         nty->size   = 8;
         nty->ty     = VarType::PTR;
         nty->ptr_to = ty;
-        arr->push_back(nty);
-        return;
+        t->ty       = nty;
     }
-    arr->push_back(ty);
+    else
+    {
+        t->ty = ty;
+    }
+    arr->push_back(t->ty);
+    paraVar.push_back(t);
 }
 
 /*
@@ -1047,10 +1052,16 @@ compound_statement
    | '{' declaration_list statement_list '}'
    ;
 */
+
 Node* compound_statement()
 {
     expect("{");
     initScope(env);
+    for (auto&& i : paraVar)
+    {
+        addVar(i);
+    }
+    paraVar.clear(); //!!内存泄露
     auto t  = newNode();
     t->type = ND_COMP_STMT;
     while (not consume("}"))
