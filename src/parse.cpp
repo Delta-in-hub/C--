@@ -1530,6 +1530,7 @@ primary_expression
     | INT_CONSTANT
     | FLOAT_CONSTANT
     | STRING_LITERAL
+    | CHAR_CONSTANT
     | '(' expression ')'
     ;
 */
@@ -1540,6 +1541,12 @@ Node* primary_expression()
     {
         t->type  = ND_NUM;
         t->ctype = intType();
+        t->val   = nowToken(-1).val;
+    }
+    else if (consume("lchar"))
+    {
+        t->type  = ND_CHAR;
+        t->ctype = charType();
         t->val   = nowToken(-1).val;
     }
     else if (consume("dnum"))

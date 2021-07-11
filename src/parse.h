@@ -24,6 +24,7 @@ enum NodeType
     ND_NUM,       // Number literal 常量
     ND_DNUM,      // Double Number literal 浮点常量
     ND_STR,       // String literal
+    ND_CHAR,      //CHAR literal
     ND_STRUCT,    // Struct 结构体
                   // ND_DECL,      // declaration
     ND_VARDEF,    // Variable definition 变量定义

@@ -15,5 +15,5 @@ int main()
         a.name = "hello";
         a.year = i;
     }
-    return 0;
+    return '0';
 }
