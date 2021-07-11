@@ -417,11 +417,11 @@ translation_unit
 void translation_unit()
 {
     auto t = type_specifier();
-    if (nowToken().type != tokenType.at("id"))
-    {
-        errorParse(nowToken(), "Expect IDENTIFIER");
-    }
-    if (nowToken(1).type == tokenType.at("("))
+    // if (nowToken().type != tokenType.at("id"))
+    // {
+    //     errorParse(nowToken(), "Expect IDENTIFIER");
+    // }
+    if (nowToken(1).type == tokenType.at("(") and nowToken().type == tokenType.at("id"))
     {
         Function* f   = new Function{};
         auto fun      = fun_declarator();
@@ -445,7 +445,14 @@ void translation_unit()
     else
     {
         std::vector<Var*>* arr = new std::vector<Var*>{};
-        declarator_list(arr);
+        /*
+        before:struct A{}; error
+        after:struct A{}; done
+        */
+        if (consume(";"))
+            --pos;
+        else
+            declarator_list(arr);
         expect(";");
         for (auto&& i : *arr)
         {

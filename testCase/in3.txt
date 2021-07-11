@@ -4,7 +4,7 @@ struct Student
 {
     char *name;
     int year;
-}stu1;
+};
 
 int main()
 {
