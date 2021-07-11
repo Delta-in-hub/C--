@@ -16,7 +16,7 @@ enum VarType
     PTR,
     ARY,
     STRUCT,
-    FUNC,
+    // FUNC,
 };
 
 enum NodeType
@@ -81,7 +81,7 @@ struct Type
     // int offset;
 
     // Function
-    Type* returning;
+    // Type* returning;
 };
 
 // Represents a variable.
@@ -112,7 +112,7 @@ struct Node
 
     // For ND_VARREF  l_expression
     Var* var;
-    Type* ctype; // C type   返回值类型
+    Type* ctype; //    返回值类型   运算结果的类型
     std::string name;
 
     int val; // Number literal
@@ -170,6 +170,7 @@ struct Program
     std::vector<Var*> gvars;
     // Vector* funcs;
     std::vector<Function*> funcs;
+    // std::vector<std::string> stringlit;
 };
 
 struct Env

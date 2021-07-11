@@ -41,6 +41,7 @@ Node* postfix_expression();
 Node* primary_expression();
 //希望当前token类型是tokentype
 //否的话,直接报错,结束程序
+
 void expect(const std::string& tokentype, const std::string& error = "Universal Error")
 {
 #ifdef DEBUG__
@@ -207,6 +208,184 @@ void addStruct(Type* ty, const std::string& name)
     }
 }
 
+// ta,tb是否为同一类型
+bool isSameType(const Type* ta, const Type* tb)
+{
+    //若类型相同,能有释放掉一个内存?
+    if (ta == tb)
+        return true;
+    switch (ta->ty)
+    {
+    case VarType::ARY:
+        if (tb->ty != ARY or ta->len != tb->len)
+            return false;
+        return isSameType(ta->ary_of, ta->ary_of);
+        break;
+    case VarType::BOOL:
+        if (tb->ty == BOOL)
+            return true;
+        else
+            return false;
+        break;
+    case VarType::CHAR:
+        if (tb->ty == CHAR)
+            return true;
+        else
+            return false;
+        break;
+    case VarType::DOUBLE:
+        if (tb->ty == DOUBLE)
+            return true;
+        else
+            return false;
+        break;
+    // case VarType::FUNC:
+    // break;
+    case VarType::INT:
+        if (tb->ty == INT)
+            return true;
+        else
+            return false;
+        break;
+    case VarType::PTR:
+        if (tb->ty != PTR)
+            return false;
+        return isSameType(ta->ptr_to, tb->ptr_to);
+        break;
+    case VarType::STRUCT:
+        if (tb->ty != STRUCT)
+            return false;
+        return ta->members == tb->members; //存疑
+        break;
+    case VarType::VOID:
+        if (tb->ty == VOID)
+            return true;
+        else
+            return false;
+        break;
+    default:
+        errorParse(nowToken(), "Type Not Found");
+        break;
+    }
+    return false;
+}
+
+// tb进行隐形类型转换后是否和ta类型相同
+bool isMatchType(const Type* ta, const Type* tb)
+{
+    if (ta == tb)
+        return true;
+    switch (ta->ty)
+    {
+    case VarType::ARY:
+        if (tb->ty != ARY or ta->len != tb->len)
+            return false;
+        return isSameType(ta->ary_of, ta->ary_of);
+        break;
+    case VarType::BOOL:
+        if (tb->ty == BOOL or tb->ty == CHAR or tb->ty == INT)
+            return true;
+        else
+            return false;
+        break;
+    case VarType::CHAR:
+        if (tb->ty == CHAR or tb->ty == INT)
+            return true;
+        else
+            return false;
+        break;
+    case VarType::DOUBLE:
+        if (tb->ty == DOUBLE or tb->ty == INT or tb->ty == CHAR)
+            return true;
+        else
+            return false;
+        break;
+    // case VarType::FUNC:
+    // break;
+    case VarType::INT:
+        if (tb->ty == INT or tb->ty == CHAR or tb->ty == DOUBLE)
+            return true;
+        else
+            return false;
+        break;
+    case VarType::PTR:
+        if (tb->ty == ARY)
+        {
+            if (isSameType(ta->ptr_to, tb->ary_of))
+                return true;
+            else
+                return false;
+        }
+        else if (tb->ty != PTR)
+            return false;
+        else
+            return isSameType(ta->ptr_to, tb->ptr_to);
+        break;
+    case VarType::STRUCT:
+        if (tb->ty != STRUCT)
+            return false;
+        return ta->members == tb->members; //存疑
+        break;
+    case VarType::VOID:
+        if (tb->ty == VOID)
+            return true;
+        else
+            return false;
+        break;
+    default:
+        errorParse(nowToken(), "Type Not Found");
+        break;
+    }
+    return false;
+}
+
+bool isCalAble(Type* ta)
+{
+    switch (ta->ty)
+    {
+    case VarType::ARY:
+    case VarType::BOOL:
+    case VarType::VOID:
+    case VarType::STRUCT:
+        return false;
+        break;
+    case VarType::PTR:
+    case VarType::DOUBLE:
+    case VarType::INT:
+    case VarType::CHAR:
+        return true;
+    default:
+        break;
+    }
+    return false;
+}
+
+Type* topType(Type* ta, Type* tb)
+{
+    if (ta->ty == PTR)
+    {
+        if (tb->ty == INT)
+            return ta;
+        else
+            return nullptr;
+    }
+    if (tb->ty == PTR)
+    {
+        if (ta->ty == INT)
+            return tb;
+        else
+            return nullptr;
+    }
+    if (ta->ty == DOUBLE)
+        return ta;
+    if (tb->ty == DOUBLE)
+        return tb;
+    if (ta->ty == INT)
+        return ta;
+    if (tb->ty == INT)
+        return tb;
+}
+
 // Var* findVar(const std::string& name);
 // Type* struct_declaration(Type* base);
 
@@ -369,37 +548,88 @@ type_specifier
     | struct-declaration pointer?
     ;
 */
+Type* voidType()
+{
+    static Type* t = nullptr;
+    if (t == nullptr)
+    {
+        t       = new Type{};
+        t->size = 1;
+        t->ty   = VarType::VOID;
+    }
+    return t;
+}
+Type* intType()
+{
+    static Type* t = nullptr;
+    if (t == nullptr)
+    {
+        t       = new Type{};
+        t->size = 4;
+        t->ty   = VarType::INT;
+    }
+    return t;
+}
+Type* doubleType()
+{
+    static Type* t = nullptr;
+    if (t == nullptr)
+    {
+        t       = new Type{};
+        t->size = 8;
+        t->ty   = VarType::DOUBLE;
+    }
+    return t;
+}
+Type* charType()
+{
+    static Type* t = nullptr;
+    if (t == nullptr)
+    {
+        t       = new Type{};
+        t->size = 1;
+        t->ty   = VarType::CHAR;
+    }
+    return t;
+}
+Type* boolType()
+{
+    static Type* t = nullptr;
+    if (t == nullptr)
+    {
+        t       = new Type{};
+        t->size = 1;
+        t->ty   = VarType::BOOL;
+    }
+    return t;
+}
 Type* type_specifier()
 {
-    auto t = new Type{};
+    Type* t = nullptr;
     if (consume("void"))
     {
-        t->ty   = VarType::VOID;
-        t->size = 1;
+        t = voidType();
     }
     else if (consume("int"))
     {
-        t->ty   = VarType::INT;
-        t->size = 4;
+        t = intType();
     }
     else if (consume("float") or consume("double"))
     {
-        t->ty   = VarType::DOUBLE;
-        t->size = 8;
+        t = doubleType();
     }
     else if (consume("char"))
     {
-        t->ty   = VarType::CHAR;
-        t->size = 1;
+        t = charType();
     }
     else if (consume("_Bool"))
     {
-        t->ty   = VarType::BOOL;
-        t->size = 1;
+        t = boolType();
     }
     else if (consume("struct"))
     {
         --pos;
+        t = new Type{};
         t = struct_declaration(t);
     }
     else
@@ -499,18 +729,23 @@ Node* l_expression()
         auto t  = newNode();
         t->type = NodeType::ND_DEREF; //类型检查在之后
         t->lhs  = l_expression();
+        if (t->lhs->ctype->ty != VarType::PTR)
+            errorParse(nowToken(), "invalid type argument of unary *");
+        t->ctype = t->lhs->ctype->ptr_to;
         return t;
     }
     Node* t = newNode();
-    t->type = ND_VARREF;
     std::string name(nowToken().start, nowToken().end);
     expect("id");
     if (consume("["))
     {
-        t->var       = findVar(t->name);
+        t->var = findVar(t->name);
+        if (t->var->ty->ty != ARY)
+            errorParse(nowToken(-2), name + " is not array type");
         t->expresson = expression();
         expect("]");
-        t->type = ND_ARRDEREF;
+        t->type  = ND_ARRDEREF;
+        t->ctype = t->var->ty->ary_of;
     }
     else if (consume("."))
     {
@@ -526,11 +761,14 @@ Node* l_expression()
         {
             errorParse(nowToken(), name2 + " is not a member of " + name + " struct");
         }
-        t->name = name2;
+        t->name  = name2;
+        t->ctype = t->var->ty->members[name2];
     }
     else
     {
-        t->var = findVar(t->name);
+        t->type  = ND_VARREF;
+        t->var   = findVar(t->name);
+        t->ctype = t->var->ty;
     }
     return t;
 }
@@ -559,7 +797,7 @@ std::vector<Node*>* expression_list()
 /*
 unary_operator
     :
-    "*"
+    //"*"
     "-"
     "!"
     ;
@@ -600,6 +838,10 @@ Node* selection_statement()
     expect("if");
     expect("(");
     n->condition = expression();
+    if (not isMatchType(boolType(), n->condition->ctype))
+    {
+        errorParse(nowToken(), "Condition expression must be boolean");
+    }
     expect(")");
     n->then = statement();
     if (consume("else"))
@@ -624,6 +866,10 @@ Node* iteration_statement()
         expect("(");
         n->condition = expression();
         expect(")");
+        if (not isMatchType(boolType(), n->condition->ctype))
+        {
+            errorParse(nowToken(), "Condition expression must be boolean");
+        }
         n->body = statement();
     }
     else if (consume("for"))
@@ -633,6 +879,10 @@ Node* iteration_statement()
         n->init = expression();
         expect(";");
         n->condition = expression();
+        if (not isMatchType(boolType(), n->condition->ctype))
+        {
+            errorParse(nowToken(), "Condition expression must be boolean");
+        }
         expect(";");
         n->inc = expression();
         expect(")");
@@ -874,7 +1124,12 @@ Node* statement()
         --pos;
         auto t       = newNode();
         t->type      = NodeType::ND_RETURN;
+        t->ctype     = t->expresson->ctype;
         t->expresson = expression();
+        if (not isMatchType(prog->funcs.back()->returnType, t->expresson->ctype))
+        {
+            errorParse(nowToken(), "Error return type");
+        }
         return t;
     }
     else
@@ -897,6 +1152,7 @@ Node* assignment_statement()
     if (consume(";"))
     {
         t->type      = NodeType::ND_EXPR_STMT;
+        t->ctype     = voidType();
         t->expresson = nullptr; //表示空语句
     }
     else if (consume("id") or consume("*"))
@@ -927,8 +1183,9 @@ Node* expression()
     int flag = 0;
     while (consume("||"))
     {
-        auto orll  = newNode();
-        orll->type = ND_LOGOR;
+        auto orll   = newNode();
+        orll->type  = ND_LOGOR;
+        orll->ctype = boolType();
         if (flag == 0)
         {
             orll->lhs = t;
@@ -943,6 +1200,10 @@ Node* expression()
             orll->rhs = t;
             t         = orll;
             flag      = (flag + 1) % 2;
+        }
+        if ((not isMatchType(boolType(), orll->lhs->ctype)) or (not isMatchType(boolType(), orll->rhs->ctype)))
+        {
+            errorParse(nowToken(), "invalid type argument of || ");
         }
     }
     return t;
@@ -960,8 +1221,9 @@ Node* logical_and_expression()
     int flag = 0;
     while (consume("&&"))
     {
-        auto orll  = newNode();
-        orll->type = ND_LOGAND;
+        auto orll   = newNode();
+        orll->type  = ND_LOGAND;
+        orll->ctype = boolType();
         if (flag == 0)
         {
             orll->lhs = t;
@@ -975,6 +1237,10 @@ Node* logical_and_expression()
             orll->rhs = t;
             t         = orll;
             flag      = (flag + 1) % 2;
+        }
+        if ((not isMatchType(boolType(), orll->lhs->ctype)) or (not isMatchType(boolType(), orll->rhs->ctype)))
+        {
+            errorParse(nowToken(), "invalid type argument of && ");
         }
     }
     return t;
@@ -992,7 +1258,8 @@ Node* equality_expression()
     int flag = 0;
     while (consume("==") || consume("!="))
     {
-        auto orll = newNode();
+        auto orll   = newNode();
+        orll->ctype = boolType();
         pos--;
         if (consume("=="))
         {
@@ -1016,6 +1283,10 @@ Node* equality_expression()
             t         = orll;
             flag      = (flag + 1) % 2;
         }
+        if (not isMatchType(orll->lhs->ctype, orll->rhs->ctype))
+        {
+            errorParse(nowToken(), "invalid type argument of ==/!= ");
+        }
     }
     return t;
 }
@@ -1036,7 +1307,8 @@ Node* relational_expression()
     int flag = 0;
     while (consume("<") || consume(">") || consume("<=") || consume(">="))
     {
-        auto orll = newNode();
+        auto orll   = newNode();
+        orll->ctype = boolType();
         pos--;
         if (consume("<"))
         {
@@ -1067,6 +1339,10 @@ Node* relational_expression()
             orll->rhs = t;
             t         = orll;
             flag      = (flag + 1) % 2;
+        }
+        if (not isMatchType(orll->lhs->ctype, orll->rhs->ctype))
+        {
+            errorParse(nowToken(), "invalid type argument of < <= > >= ");
         }
     }
     return t;
@@ -1109,6 +1385,15 @@ Node* additive_expression()
             t         = orll;
             flag      = (flag + 1) % 2;
         }
+        if (not(isCalAble(orll->lhs->ctype) and isCalAble(orll->rhs->ctype)))
+        {
+            errorParse(nowToken(), "invalid type argument of + / - ");
+        }
+        orll->ctype = topType(orll->lhs->ctype, orll->rhs->ctype);
+        if (orll->ctype == nullptr)
+        {
+            errorParse(nowToken(), "invalid type argument of + / - ");
+        }
     }
     return t;
 }
@@ -1150,6 +1435,15 @@ Node* multiplicative_expression()
             t         = orll;
             flag      = (flag + 1) % 2;
         }
+        if (not(isCalAble(orll->lhs->ctype) and isCalAble(orll->rhs->ctype)))
+        {
+            errorParse(nowToken(), "invalid type argument of * / / ");
+        }
+        orll->ctype = topType(orll->lhs->ctype, orll->rhs->ctype);
+        if (orll->ctype == nullptr)
+        {
+            errorParse(nowToken(), "invalid type argument of * / / ");
+        }
     }
     return t;
 }
@@ -1162,11 +1456,15 @@ unary_expression     //一元操作符
 
 Node* unary_expression()
 {
-    if (consume("*") or consume("-") or consume("!"))
+    if (consume("-") or consume("!"))
     {
         pos--;
         auto t = unary_operator();
         t->lhs = postfix_expression();
+        if (not isCalAble(t->lhs->ctype))
+        {
+            errorParse(nowToken(), "invalid type argument of unary expression");
+        }
         return t;
     }
     else
@@ -1189,15 +1487,29 @@ Node* postfix_expression()
         t->type   = ND_CALL;
         auto name = nowName();
         t->fun    = findFuncion(name);
+        t->ctype  = t->fun->returnType;
         consume("id");
         consume("(");
         if (consume(")"))
         {
-            t->args = new std::vector<Node*>{};
+            if (t->fun->params == nullptr or t->fun->params->empty())
+                t->args = new std::vector<Node*>{};
+            else
+                errorParse(nowToken(-3), "Arguments do not match parameters");
         }
         else
         {
-            t->args = expression_list();
+            t->args       = expression_list();
+            auto&& argarr = *(t->args);
+            if (t->args->size() != t->fun->params->size())
+                errorParse(nowToken(), "Arguments do not match parameters");
+            for (size_t i = 0; i < t->fun->params->size(); i++)
+            {
+                if (not isMatchType(t->fun->params->at(i), argarr[i]->ctype))
+                {
+                    errorParse(nowToken(), "Arguments do not match parameters");
+                }
+            }
             expect(")");
         }
         return t;
@@ -1223,18 +1535,26 @@ Node* primary_expression()
     auto t = newNode();
     if (consume("num"))
     {
-        t->type = ND_NUM;
-        t->val  = nowToken(-1).val;
+        t->type  = ND_NUM;
+        t->ctype = intType();
+        t->val   = nowToken(-1).val;
     }
     else if (consume("dnum"))
     {
-        t->type = ND_DNUM;
-        t->dval = nowToken(-1).dval;
+        t->type  = ND_DNUM;
+        t->ctype = doubleType();
+        t->dval  = nowToken(-1).dval;
     }
-    else if (consume("str"))
+    else if (consume("str")) //要特别判断
     {
         t->type = ND_STR;
         t->name = nowName(-1);
+        // prog->stringlit.push_back(t->name);
+        auto charp    = new Type{};
+        charp->size   = 8;
+        charp->ty     = PTR;
+        charp->ptr_to = charType();
+        t->ctype      = charp;
     }
     else if (consume("("))
     {
@@ -1253,18 +1573,51 @@ Node* primary_expression()
             orll->rhs  = expression();
             orll->type = ND_ASSIGN;
             t          = orll;
+            if (not isMatchType(orll->lhs->ctype, orll->rhs->ctype))
+                errorParse(nowToken(), "invalid type argument of = ");
         }
         else if (consume("++") or consume("--"))
         {
             pos--;
-            auto orll = newNode();
-            orll->lhs = t;
+            auto orll   = newNode();
+            orll->ctype = t->ctype;
+            orll->lhs   = t;
             if (consume("++"))
             {
+                switch (orll->ctype->ty)
+                {
+                case VarType::ARY:
+                case VarType::BOOL:
+                case VarType::VOID:
+                case VarType::STRUCT:
+                    errorParse(nowToken(), "invalid type argument of ++");
+                    break;
+                case VarType::PTR:
+                case VarType::DOUBLE:
+                case VarType::INT:
+                case VarType::CHAR:
+                default:
+                    break;
+                }
                 orll->type = ND_INC;
             }
             else if (consume("--"))
             {
+                switch (orll->ctype->ty)
+                {
+                case VarType::ARY:
+                case VarType::BOOL:
+                case VarType::VOID:
+                case VarType::STRUCT:
+                    errorParse(nowToken(), "invalid type argument of --");
+                    break;
+                case VarType::PTR:
+                case VarType::DOUBLE:
+                case VarType::INT:
+                case VarType::CHAR:
+                default:
+                    break;
+                }
                 orll->type = ND_DEC;
             }
             t = orll;
