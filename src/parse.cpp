@@ -966,6 +966,7 @@ void declaration(std::vector<Var*>* arr)
         {
             i->ty = ty;
         }
+        addVar(i);
     }
 }
 
@@ -1088,10 +1089,10 @@ Node* compound_statement()
         {
             --pos;
             auto decl = declaration_list();
-            for (auto&& i : *decl)
-            {
-                addVar(i);
-            }
+            // for (auto&& i : *decl)
+            // {
+            //     addVar(i);
+            // }
             if (consume("}"))
             {
                 --pos;

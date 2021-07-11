@@ -1,0 +1,16 @@
+double fun(int a)
+{
+    a = 12;
+    return a + 10;  //bug
+}
+
+
+int main()
+{
+    while(1)
+    {
+        int a;
+        _Bool f = fun(a);  //bug
+    }
+    return 0;
+}

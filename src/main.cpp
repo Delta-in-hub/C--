@@ -54,7 +54,7 @@ int main(void)
 
     const char* str;
     // string st        = "???????��????";
-    path     = "../testCase/in4.txt";
+    path     = "../testCase/in5.txt";
     str      = openFile(path);
     buferror = str; // for parse error process
     scan(str);
