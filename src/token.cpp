@@ -24,14 +24,14 @@ static inline bool startsWith(const string_view& s1, const string& s2)
 void errorToken(const char* buf, const char* start, const char* end, const char* path, std::string msg)
 {
     const char* s = buf;
-    int line = 0, col = 0;
+    int line = 1, col = 1;
     for (const char* p = buf; p; p++)
     {
         if (*p == '\n')
         {
             s = p + 1;
             line++;
-            col = 0;
+            col = 1;
             continue;
         }
         if (p != start)
