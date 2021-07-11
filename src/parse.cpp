@@ -306,7 +306,7 @@ bool isMatchType(const Type* ta, const Type* tb)
             return false;
         break;
     case VarType::DOUBLE:
-        if (tb->ty == DOUBLE /*or tb->ty == INT or tb->ty == CHAR*/)
+        if (tb->ty == DOUBLE or tb->ty == INT or tb->ty == CHAR)
             return true;
         else
             return false;
@@ -483,6 +483,13 @@ void translation_unit()
             }
             addVar(i);
             prog->gvars.push_back(i);
+            if (i->data != nullptr)
+            {
+                if (not isMatchType(i->ty, i->data->ctype))
+                {
+                    errorParse(nowToken(-1), "Unmatched type in Initialization");
+                }
+            }
         }
     }
 }
@@ -967,6 +974,13 @@ void declaration(std::vector<Var*>* arr)
             i->ty = ty;
         }
         addVar(i);
+        if (i->data != nullptr)
+        {
+            if (not isMatchType(i->ty, i->data->ctype))
+            {
+                errorParse(nowToken(-1), "Unmatched type in Initialization");
+            }
+        }
     }
 }
 

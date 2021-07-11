@@ -1,7 +1,7 @@
 double fun(int a)
 {
     a = 12;
-    return a + 10.0;  //bug
+    return a + 10.0;
 }
 
 
@@ -10,7 +10,7 @@ int main()
     while(1)
     {
         int a;
-        _Bool f = fun(a);  //bug
+        int f = fun(a);  //bug
     }
     return 0;
 }
