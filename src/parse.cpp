@@ -1061,7 +1061,15 @@ Node* compound_statement()
             {
                 addVar(i);
             }
-            t->statementList = statement_list();  //函数调用
+            if (consume("}"))
+            {
+                --pos;
+                t->statementList = nullptr;
+            }
+            else
+            {
+                t->statementList = statement_list(); //函数调用
+            }
         }
     }
     exitScope();
@@ -1128,7 +1136,7 @@ Node* statement()
         t->type      = NodeType::ND_RETURN;
         t->expresson = expression();
         expect(";");
-        t->ctype     = t->expresson->ctype;
+        t->ctype = t->expresson->ctype;
         if (not isMatchType(prog->funcs.back()->returnType, t->expresson->ctype))
         {
             errorParse(nowToken(), "Error return type");
