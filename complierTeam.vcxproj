@@ -113,6 +113,9 @@
     <ClCompile Include="src\parse.cpp" />
     <ClCompile Include="src\token.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="testCase\in2.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

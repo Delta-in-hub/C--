@@ -255,7 +255,7 @@ void scan(const char* buf)
                 }
                 if (not flag)
                 {
-                    errorToken(buf, buf + i, buf + j + 1, path, "标识符格式错误");
+                    errorToken(buf, buf + i, buf + j + 1, path, "Identifier format error");
                 }
             }
         }
