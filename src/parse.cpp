@@ -404,7 +404,7 @@ void parse()
         translation_unit();
     }
 #ifdef DEBUG__
-    std::cout << "Parse done" << std::endl;
+    std::cout << "Complier done" << std::endl;
 #endif
 }
 

@@ -1,4 +1,4 @@
-int cnt = 10;
+int cnt = 10,arr[20];
 
 struct Student
 {
