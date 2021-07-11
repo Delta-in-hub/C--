@@ -105,6 +105,7 @@ void scan(const char* buf)
             }
             if (s[j] == '.')
             {
+                isint = false;
                 temp += s[j++];
                 while (s[j] <= '9' and s[j] >= '0')
                 {
@@ -113,6 +114,7 @@ void scan(const char* buf)
             }
             if (s[j] == 'e')
             {
+                isint = false;
                 temp += s[j++];
                 if (s[j] == '+' or s[j] == '-')
                     temp += s[j++];
@@ -122,7 +124,6 @@ void scan(const char* buf)
                 }
                 if (s[j] == '.')
                 {
-                    isint = false;
                     temp += s[j++];
                     while (s[j] <= '9' and s[j] >= '0')
                     {
