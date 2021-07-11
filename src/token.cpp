@@ -15,6 +15,12 @@ static inline bool startsWith(const string_view& s1, const string& s2)
     return s1.substr(0, s2.length()) == s2;
 }
 
+
+/*
+<文件名>:Line 5:6: error: 错误信息
+打印那一行
+*/
+
 void errorToken(const char* buf, const char* start, const char* end, const char* path, std::string msg)
 {
     const char* s = buf;

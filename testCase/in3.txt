@@ -1,0 +1,19 @@
+int cnt = 10;
+
+struct Student
+{
+    char *name;
+    int year;
+}stu1;
+
+int main()
+{
+    int i;
+    for(i = 0; i< cnt ;i++)
+    {
+        struct Student a;
+        a.name = "hello";
+        a.year = i;
+    }
+    return 0;
+}
