@@ -924,10 +924,12 @@ declaration
 void declaration(std::vector<Var*>* arr)
 {
     auto ty = type_specifier();
+    auto be = arr->size();
     declarator_list(arr);
     expect(";");
-    for (auto&& i : *arr)
+    for (be; be != arr->size(); be++)
     {
+        auto&& i = (*arr)[be];
         if (i->isArray)
         {
             auto ty2    = new Type{};
