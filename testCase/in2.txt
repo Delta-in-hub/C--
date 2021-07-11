@@ -1,0 +1,22 @@
+_Bool flag;
+
+int main()
+{
+    int cnt = 0;
+    flag = 1;
+    while(flag != 0)
+    {
+        cnt++;
+        if(cnt > 10)
+        {
+            flag = 0;
+        }
+    }
+    // for(int i=0;i < cnt;i++)
+    int i = 0;
+    for(i;i<cnt ;i++)
+    {
+        cnt--;
+    }
+    return 0;
+}

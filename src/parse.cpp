@@ -145,7 +145,7 @@ Var* findVar(const std::string& name)
         if (t->vars.find(name) != t->vars.end())
             return t->vars.at(name);
         else
-            t = env->prev;
+            t = t->prev;
     }
     errorParse(nowToken(), "undefined variable");
     return nullptr;
@@ -159,7 +159,7 @@ Type* findStruct(const std::string& name)
         if (t->structs.find(name) != t->structs.end())
             return t->structs.at(name);
         else
-            t = env->prev;
+            t = t->prev;
     }
     errorParse(nowToken(), "undefined struct");
     return nullptr;
@@ -1124,7 +1124,7 @@ Node* statement()
         --pos;
         return iteration_statement();
     }
-    else if (consume(";") || consume("id") || consume("*"))
+    else if (consume(";") || consume("id") || consume("*") || consume("("))
     {
         --pos;
         return assignment_statement();
@@ -1153,31 +1153,21 @@ Node* statement()
 /*
 assignment_statement
    : ';'
-   |  l_expression '=' expression ';'
-   ;
+   ;  primary_expression ";"
+//    |  l_expression '=' expression ';'
 */
 Node* assignment_statement()
 {
-    auto t  = newNode();
-    t->type = ND_ASSIGN;
     if (consume(";"))
     {
+        auto t       = newNode();
         t->type      = NodeType::ND_EXPR_STMT;
         t->ctype     = voidType();
         t->expresson = nullptr; //表示空语句
+        return t;
     }
-    else if (consume("id") or consume("*"))
-    {
-        pos--;
-        t->lhs = l_expression();
-        expect("=");
-        t->rhs = expression();
-        expect(";");
-    }
-    else
-    {
-        errorParse(nowToken(), "Expect assignment");
-    }
+    auto t = primary_expression();
+    expect(";");
     return t;
 }
 
@@ -1467,7 +1457,7 @@ unary_expression     //一元操作符
 
 Node* unary_expression()
 {
-    if (consume("-") or consume("!"))
+    if (consume("-") or consume("!")) //取地址符 &
     {
         pos--;
         auto t = unary_operator();
