@@ -1,7 +1,7 @@
 int a;
 char b;
 
-int fun(int a,char b)
+_Bool fun(int a,char b)
 {
    if(b < a)
    {
@@ -17,5 +17,6 @@ int main()
 {
    int c;
    c = a + b;
-   int d = fun(a,b);
+   int d;
+   d = fun(a,b);
 }

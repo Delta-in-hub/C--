@@ -1182,9 +1182,10 @@ Node* statement()
 }
 
 /*
+单行语句
 assignment_statement
    : ';'
-   ;  primary_expression ";"
+   ;  postfix_expression ";"
 //    |  l_expression '=' expression ';'
 */
 Node* assignment_statement()
@@ -1197,7 +1198,7 @@ Node* assignment_statement()
         t->expresson = nullptr; //表示空语句
         return t;
     }
-    auto t = primary_expression();
+    auto t = postfix_expression();
     expect(";");
     return t;
 }
@@ -1660,6 +1661,10 @@ Node* primary_expression()
                 orll->type = ND_DEC;
             }
             t = orll;
+        }
+        else if (consume("(")) // Function call
+        {
+            ;
         }
     }
     return t;

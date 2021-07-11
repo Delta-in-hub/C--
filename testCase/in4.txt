@@ -1,5 +1,19 @@
+int i = 0,arr[12];
+int *p;
+
 int fun(int a)
 {
     a = 12;
     return a + 10;
+}
+
+
+int main()
+{
+    while(1)
+    {
+        fun(i);
+        *p = i;
+    }
+    return 0;
 }
