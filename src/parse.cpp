@@ -384,6 +384,7 @@ Type* topType(Type* ta, Type* tb)
         return ta;
     if (tb->ty == INT)
         return tb;
+    return nullptr;
 }
 
 // Var* findVar(const std::string& name);
@@ -437,7 +438,7 @@ void translation_unit()
         nv->ty   = ny;
         addVar(nv);
         */
-
+        // expect(")");
         prog->funcs.push_back(f); // for recursive
         f->compound = compound_statement();
     }
@@ -495,6 +496,7 @@ Node* fun_declarator()
     else
     {
         t->params = parameter_list();
+        expect(")");
     }
     return t;
 }
@@ -1059,7 +1061,7 @@ Node* compound_statement()
             {
                 addVar(i);
             }
-            t->statementList = statement_list();
+            t->statementList = statement_list();  //函数调用
         }
     }
     exitScope();
@@ -1121,11 +1123,12 @@ Node* statement()
     }
     else if (consume("return"))
     {
-        --pos;
+        // --pos;
         auto t       = newNode();
         t->type      = NodeType::ND_RETURN;
-        t->ctype     = t->expresson->ctype;
         t->expresson = expression();
+        expect(";");
+        t->ctype     = t->expresson->ctype;
         if (not isMatchType(prog->funcs.back()->returnType, t->expresson->ctype))
         {
             errorParse(nowToken(), "Error return type");
