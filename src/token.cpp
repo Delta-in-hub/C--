@@ -39,8 +39,9 @@ void errorToken(const char* buf, const char* start, const char* end, const char*
             col++;
             continue;
         }
-        cout << "error\t\t\tfile\t\tline\tcol" << endl;
-        cout << msg << "\t" << path << "\t" << line << "\t" << col << endl;
+        cout << '<' << path << ">:" << "Line " << line << ':' << col << ": error: " << msg << endl;
+        //cout << "error\t\t\tfile\t\tline\tcol" << endl;
+        //cout << msg << "\t" << path << "\t" << line << "\t" << col << endl;
         int linelen = strchr(p, '\n') - s;
         printf("%.*s\n", linelen, s);
 #ifdef DEBUG__
