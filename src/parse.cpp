@@ -1440,7 +1440,7 @@ Node* additive_expression()
             orll->rhs = multiplicative_expression();
             orll->lhs = t;
             t         = orll;
-            flag      = (flag + 1) % 2;
+            // flag      = (flag + 1) % 2;
         }
         else if (flag == 1)
         {
@@ -1473,7 +1473,7 @@ Node* multiplicative_expression()
 {
     auto t   = unary_expression();
     int flag = 0;
-    while (consume("*") || consume("/"))
+    while (consume("*") || consume("/") || consume("%"))
     {
         auto orll = newNode();
         pos--;
@@ -1485,12 +1485,16 @@ Node* multiplicative_expression()
         {
             orll->type = ND_DIV;
         }
+        else if (consume("%"))
+        {
+            orll->type = ND_MOD;
+        }
         if (flag == 0)
         {
             orll->rhs = unary_expression();
             orll->lhs = t;
             t         = orll;
-            flag      = (flag + 1) % 2;
+            // flag      = (flag + 1) % 2;
         }
         else if (flag == 1)
         {
@@ -1501,12 +1505,12 @@ Node* multiplicative_expression()
         }
         if (not(isCalAble(orll->lhs->ctype) and isCalAble(orll->rhs->ctype)))
         {
-            errorParse(nowToken(), "invalid type argument of * / / ");
+            errorParse(nowToken(), "invalid type argument of * / % ");
         }
         orll->ctype = topType(orll->lhs->ctype, orll->rhs->ctype);
         if (orll->ctype == nullptr)
         {
-            errorParse(nowToken(), "invalid type argument of * / / ");
+            errorParse(nowToken(), "invalid type argument of * / % ");
         }
     }
     return t;

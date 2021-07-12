@@ -276,6 +276,24 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
         }
         break;
     }
+    case ND_MOD: {
+        auto&& c1 = constantCalculate(node->lhs);
+        auto&& c2 = constantCalculate(node->rhs);
+        if (get<0>(c1) and get<0>(c2))
+        {
+            double a, b;
+            if (node->lhs->type == ND_DNUM)
+                a = get<2>(c1);
+            else
+                a = get<1>(c1);
+            if (node->rhs->type == ND_DNUM)
+                b = get<2>(c2);
+            else
+                b = get<1>(c2);
+            return {true, int(a) % int(b), int(a) % int(b)};
+        }
+        break;
+    }
     default:
         break;
     }

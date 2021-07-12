@@ -58,10 +58,10 @@ enum NodeType
     ND_LOGAND,    // &&
     ND_LOGOR,     // ||
     ND_INC,       // ++
-    ND_DEC        // --
+    ND_DEC,        // --
+    ND_MOD,       // %
     // ND_SHL,       // <<
     // ND_SHR,       // >>
-    // ND_MOD,       // %
 };
 
 struct Type
