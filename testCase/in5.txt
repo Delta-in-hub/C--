@@ -10,7 +10,7 @@ int main()
     while(1)
     {
         int a;
-        int f = fun(a);  //bug
+        int f = fun(a);  //bug fixed
     }
     return 0;
 }

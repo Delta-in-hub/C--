@@ -49,12 +49,28 @@ void outPutParse(bool flag = false)
     cout << endl;
 }
 
-int main(void)
+void usage()
 {
+    printf("Usage: cc <FilePath>\n");
+    getchar();
+    exit(1);
+}
 
+int main(int argc, char** argv)
+{
+    if (argc == 1)
+    {
+        path = "../testCase/in6.txt";
+    }
+    else if (argc == 2)
+    {
+        path = argv[1];
+    }
+    else
+    {
+        usage();
+    }
     const char* str;
-    // string st        = "???????��????";
-    path     = "../testCase/in5.txt";
     str      = openFile(path);
     buferror = str; // for parse error process
     scan(str);

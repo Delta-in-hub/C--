@@ -829,26 +829,26 @@ std::vector<Node*>* expression_list()
 /*
 unary_operator
     :
-    //"*"
     "-"
     "!"
+    "&"
     ;
 */
 
 Node* unary_operator()
 {
     auto n = newNode();
-    if (consume("*"))
-    {
-        n->type = ND_DEREF;
-    }
-    else if (consume("-"))
+    if (consume("-"))
     {
         n->type = ND_NEG;
     }
     else if (consume("!"))
     {
         n->type = ND_NOT;
+    }
+    else if (consume("&"))
+    {
+        n->type = ND_ADDR;
     }
     else
     {
@@ -1504,11 +1504,28 @@ unary_expression     //一元操作符
 
 Node* unary_expression()
 {
-    if (consume("-") or consume("!")) //取地址符 &
+    if (consume("-") or consume("!") or consume("&")) //取地址符 &
     {
         pos--;
-        auto t = unary_operator();
-        t->lhs = postfix_expression();
+        auto t   = unary_operator(); // wait for & and type
+        t->lhs   = postfix_expression();
+        Type* nt = nullptr;
+        switch (t->type)
+        {
+        case ND_NEG: //-
+        case ND_NOT: //!
+            t->ctype = t->lhs->ctype;
+            break;
+        case ND_ADDR: //&
+            nt         = new Type{};
+            nt->size   = 8;
+            nt->ty     = VarType::PTR;
+            nt->ptr_to = t->lhs->ctype;
+            t->ctype   = nt;
+            break;
+        default:
+            break;
+        }
         if (not isCalAble(t->lhs->ctype))
         {
             errorParse(nowToken(), "invalid type argument of unary expression");
@@ -1623,11 +1640,12 @@ Node* primary_expression()
         t = l_expression();
         if (consume("="))
         {
-            auto orll  = newNode();
-            orll->lhs  = t;
-            orll->rhs  = expression();
-            orll->type = ND_ASSIGN;
-            t          = orll;
+            auto orll   = newNode();
+            orll->lhs   = t;
+            orll->rhs   = expression();
+            orll->type  = ND_ASSIGN;
+            orll->ctype = orll->lhs->ctype;
+            t           = orll;
             if (not isMatchType(orll->lhs->ctype, orll->rhs->ctype))
                 errorParse(nowToken(), "invalid type argument of = ");
         }
@@ -1676,10 +1694,6 @@ Node* primary_expression()
                 orll->type = ND_DEC;
             }
             t = orll;
-        }
-        else if (consume("(")) // Function call
-        {
-            ;
         }
     }
     return t;

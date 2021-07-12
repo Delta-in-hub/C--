@@ -1,0 +1,15 @@
+int a,arr[10];
+int *p;
+
+void fun()
+{
+    p = &a;
+}
+
+int main()
+{
+    fun();
+    arr[0] = 12;
+    *p = arr[0];
+    return 10;
+}
