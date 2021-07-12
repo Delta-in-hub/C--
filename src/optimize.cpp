@@ -405,6 +405,10 @@ bool statementOptimize(Node* i)
     case ND_INC:
     case ND_DEC:
         return false;
+    case ND_VARREF:
+    case ND_DEREF:
+    case ND_ARRDEREF:
+    case ND_DOT:
     case ND_NUM:
     case ND_CHAR:
     case ND_DNUM:
