@@ -19,8 +19,8 @@ std::vector<Node*>* expression_list();
 Node* unary_operator();
 Node* selection_statement();
 Node* iteration_statement();
-std::vector<Var*>* declaration_list();
-void declaration(std::vector<Var*>* arr);
+std::vector<Var*>* declaration_list(bool flag);
+void declaration(std::vector<Var*>* arr, bool flag);
 void declarator_list(std::vector<Var*>* arr);
 
 Var* declarator();
@@ -718,7 +718,7 @@ struct-declaration-list :
 */
 void struct_declaration_list(Type* base)
 {
-    auto arr = declaration_list();
+    auto arr = declaration_list(false);
     for (auto&& i : *arr)
     {
         base->size += i->size;
@@ -932,26 +932,26 @@ declaration_list
     | declaration_list declaration
     ;
 */
-std::vector<Var*>* declaration_list()
+std::vector<Var*>* declaration_list(bool flag)
 {
     std::vector<Var*>* arr = new std::vector<Var*>{};
-    declaration(arr);
+    declaration(arr, flag);
     while (consume("void") or consume("char") or consume("_Bool") or consume("int") or consume("double") or
            consume("struct"))
     {
         --pos;
-        declaration(arr);
+        declaration(arr, flag);
     }
     return arr;
 }
 
 /*
-变量定义
+局部变量定义
 declaration
     : type_specifier declarator_list ';'
     ;
 */
-void declaration(std::vector<Var*>* arr)
+void declaration(std::vector<Var*>* arr, bool flag)
 {
     auto ty = type_specifier();
     auto be = arr->size();
@@ -973,7 +973,8 @@ void declaration(std::vector<Var*>* arr)
         {
             i->ty = ty;
         }
-        addVar(i);
+        if (flag) //临时变量要立即加入符号表,struct中不用加
+            addVar(i);
         if (i->data != nullptr)
         {
             if (not isMatchType(i->ty, i->data->ctype))
@@ -1102,19 +1103,30 @@ Node* compound_statement()
                  consume("struct"))
         {
             --pos;
-            auto decl = declaration_list();
-            // for (auto&& i : *decl)
-            // {
-            //     addVar(i);,
-            // }
+            auto decl        = declaration_list(true); //局部变量
+            t->statementList = new std::vector<Node*>;
+            for (auto&& i : *decl)
+            {
+                auto nd   = new Node{};
+                nd->type  = ND_VARDEF;
+                nd->ctype = i->ty;
+                nd->name  = i->name;
+                nd->var   = i;
+                t->statementList->push_back(nd);
+            }
+
             if (consume("}"))
             {
                 --pos;
-                t->statementList = nullptr;
             }
             else
             {
-                t->statementList = statement_list(); //函数调用
+                auto arr = statement_list(); //函数调用
+                for (auto&& i : *arr)
+                {
+                    t->statementList->push_back(i);
+                }
+                delete arr;
             }
         }
         else
@@ -1368,7 +1380,7 @@ Node* relational_expression()
         }
         else if (consume(">"))
         {
-            orll->type = ND_GREAD;
+            orll->type = ND_GREAT;
         }
         else if (consume("<="))
         {

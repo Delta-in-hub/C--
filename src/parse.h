@@ -41,7 +41,7 @@ enum NodeType
     ND_LE,        // <=
     ND_GE,        // >=
     ND_LESS,      // <
-    ND_GREAD,     // >
+    ND_GREAT,     // >
     ND_ADD,       // +
     ND_SUB,       // -
     ND_LOGAND,    // &&
@@ -179,7 +179,8 @@ struct Env
     // Map* vars; //变量
     std::unordered_map<std::string, Var*> vars;
     // Map* typedefs; //
-    std::unordered_map<std::string, Type*> typedefs;
+    // std::unordered_map<std::string, Type*> typedefs;
+
     // Map* tags; //结构体
     std::unordered_map<std::string, Type*> structs;
     struct Env* prev;
