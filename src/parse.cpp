@@ -1105,7 +1105,7 @@ Node* compound_statement()
             auto decl = declaration_list();
             // for (auto&& i : *decl)
             // {
-            //     addVar(i);
+            //     addVar(i);,
             // }
             if (consume("}"))
             {
@@ -1116,6 +1116,10 @@ Node* compound_statement()
             {
                 t->statementList = statement_list(); //函数调用
             }
+        }
+        else
+        {
+            errorParse(nowToken(), "Expect statement or declaration");
         }
     }
     exitScope();
