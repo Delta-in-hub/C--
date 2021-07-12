@@ -24,7 +24,7 @@ enum NodeType
     ND_NUM,       // Number literal 常量
     ND_DNUM,      // Double Number literal 浮点常量
     ND_STR,       // String literal
-    ND_CHAR,      //CHAR literal
+    ND_CHAR,      // CHAR literal
     ND_STRUCT,    // Struct 结构体
                   // ND_DECL,      // declaration
     ND_VARDEF,    // Variable definition 变量定义
@@ -36,6 +36,15 @@ enum NodeType
     ND_DEREF,     // pointer dereference ("*")             lhs
     ND_ARRDEREF,  // array dereference : arr[10]          var expression
     ND_DOT,       // Struct member access                  var  name
+    ND_RETURN,    // "return"
+    ND_CALL,      // Function call
+    ND_FUNC,      // Function definition
+    ND_COMP_STMT, // Compound statement
+    ND_EXPR_STMT, // Expression statement
+    ND_NULL,      // NULL Statement
+    ND_ASSIGN,    // assign 赋值
+    ND_NEG,       // Negitive  -
+    ND_NOT,       // Logic not !
     ND_EQ,        // ==
     ND_NE,        // !=
     ND_LE,        // <=
@@ -44,23 +53,15 @@ enum NodeType
     ND_GREAT,     // >
     ND_ADD,       // +
     ND_SUB,       // -
-    ND_LOGAND,    // &&
-    ND_LOGOR,     // ||
-    ND_SHL,       // <<
-    ND_SHR,       // >>
-    ND_MOD,       // %
-    ND_RETURN,    // "return"
-    ND_CALL,      // Function call
-    ND_FUNC,      // Function definition
-    ND_COMP_STMT, // Compound statement
-    ND_EXPR_STMT, // Expression statement
-    ND_NEG,       // Negitive  -
-    ND_NOT,       // Logic not !
-    ND_ASSIGN,    // assign 赋值
     ND_MUL,       // *
     ND_DIV,       // /
+    ND_LOGAND,    // &&
+    ND_LOGOR,     // ||
     ND_INC,       // ++
     ND_DEC        // --
+    // ND_SHL,       // <<
+    // ND_SHR,       // >>
+    // ND_MOD,       // %
 };
 
 struct Type
@@ -116,6 +117,7 @@ struct Node
     Type* ctype; //    返回值类型   运算结果的类型
     std::string name;
 
+    bool constant;    //是否为常值,for optimize
     int val; // Number literal
     double dval;
     Node* expresson; // expresson  类似  1+2  3  fun(a) 见 https://zh.cppreference.com/w/c/language/expressions

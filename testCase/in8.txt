@@ -1,0 +1,38 @@
+int fun1()
+{
+    ;
+}
+
+int fun2()
+{
+    int a;
+    char b;
+}
+
+int fun3()
+{
+    int a;
+    if(1 < 2)
+    {
+        ;
+    }
+    else
+    {
+        a;
+    }
+}
+
+int b;
+
+int fun4()
+{
+    while(2 < 1)
+    {
+        int a;
+        a = a + 1;
+    }
+    while(2 > 1)
+    {
+        b;
+    }
+}

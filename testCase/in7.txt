@@ -1,10 +1,4 @@
-int fun()
-{
-    int a =10;
-    int b = a + 10;
-    if(b > a)
-        b = 20;
-    else
-        b = 10;
-    return 0;
-}
+int x = 10,y=10;
+_Bool f = x == y,f2 = (x+10) > (y + 20);
+int z1 = x + y,z2 = x*y ,z3 = x/y,z4=-10,z5=-x,z6=!y;
+_Bool z7=x&&y;

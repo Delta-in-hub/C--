@@ -1,3 +1,4 @@
+#include "optimize.h"
 #include "parse.h"
 #include "stdafx.h"
 #include "token.h"
@@ -60,7 +61,7 @@ int main(int argc, char** argv)
 {
     if (argc == 1)
     {
-        path = "../testCase/in7.txt";
+        path = "../testCase/in8.txt";
     }
     else if (argc == 2)
     {
@@ -77,6 +78,7 @@ int main(int argc, char** argv)
     outPutToken(true);
     parse();
     outPutParse(true);
+    optimize();
     getchar();
     return 0;
 }

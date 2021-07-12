@@ -1224,7 +1224,7 @@ Node* assignment_statement()
     if (consume(";"))
     {
         auto t       = newNode();
-        t->type      = NodeType::ND_EXPR_STMT;
+        t->type      = NodeType::ND_NULL;
         t->ctype     = voidType();
         t->expresson = nullptr; //表示空语句
         return t;
