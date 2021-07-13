@@ -1,0 +1,42 @@
+int a;
+int b = 10;
+char c = 'a';
+int *p;
+int *pa = &a;
+char *str = "Hello";
+int arr[10];
+struct A{
+    int a;
+    char b;
+    int *p;
+}sa;
+
+
+
+
+void fun()
+{
+    int t = 0;
+    int m = 2;
+    if(m > t)
+    {
+        m = m - t;
+    }
+    else
+    {
+        m = m + t;
+    }
+}
+
+int fun1(int a)
+{
+    a = a + 10;
+    return a;
+}
+
+int main()
+{
+    fun();
+    fun1(b);
+    return 0;
+}

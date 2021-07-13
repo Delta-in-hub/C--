@@ -1,3 +1,4 @@
+#include "codegen.h"
 #include "optimize.h"
 #include "parse.h"
 #include "stdafx.h"
@@ -61,7 +62,7 @@ int main(int argc, char** argv)
 {
     if (argc == 1)
     {
-        path = "../testCase/in9.txt";
+        path = "../testCase/in10.txt";
     }
     else if (argc == 2)
     {
@@ -79,6 +80,8 @@ int main(int argc, char** argv)
     parse();
     outPutParse(true);
     optimize();
-    getchar();
+    // getchar();
+    cout << endl << endl << "CODE GEN " << endl;
+    codeGen();
     return 0;
 }

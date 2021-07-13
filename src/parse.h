@@ -58,7 +58,7 @@ enum NodeType
     ND_LOGAND,    // &&
     ND_LOGOR,     // ||
     ND_INC,       // ++
-    ND_DEC,        // --
+    ND_DEC,       // --
     ND_MOD,       // %
     // ND_SHL,       // <<
     // ND_SHR,       // >>
@@ -79,7 +79,7 @@ struct Type
 
     // Struct
     // Map* members;
-    std::unordered_map<std::string, Type*> members;
+    std::map<std::string, Type*> members;
     // int offset;
 
     // Function
@@ -117,8 +117,8 @@ struct Node
     Type* ctype; //    返回值类型   运算结果的类型
     std::string name;
 
-    bool constant;    //是否为常值,for optimize
-    int val; // Number literal
+    bool constant; //是否为常值,for optimize
+    int val;       // Number literal
     double dval;
     Node* expresson; // expresson  类似  1+2  3  fun(a) 见 https://zh.cppreference.com/w/c/language/expressions
     std::vector<Node*>* statementList; // Compound statement
@@ -158,8 +158,9 @@ struct Function
 {
     std::string name;           //函数名
     std::vector<Type*>* params; //形参列表
-    Type* returnType;           //返回值类型
-    Node* compound;             //函数体
+    std::vector<std::string>* paraName;
+    Type* returnType; //返回值类型
+    Node* compound;   //函数体
     // Node* info;     //
     // Vector* lvars;
     // std::vector<Var*> lvars;

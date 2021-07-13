@@ -439,6 +439,11 @@ void translation_unit()
         f->name       = fun->name;
         f->params     = fun->params;
         f->returnType = t;
+        f->paraName   = new std::vector<std::string>;
+        for (auto&& i : paraVar)
+        {
+            f->paraName->push_back(i->name);
+        }
 
         /*
         //变量名视作为变量的一种
