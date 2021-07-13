@@ -3,7 +3,8 @@ int b = 10;
 char c = 'a';
 int *p;
 int *pa = &a;
-char *str = "Hello";
+char *str = "\\Hello\n";
+char *str2 = "\\World\n";
 int arr[10];
 struct A{
     int a;
@@ -15,7 +16,6 @@ struct A{
 void puts(char *str)
 {
     ;
-    // puts()
 }
 
 void fun()
@@ -24,7 +24,7 @@ void fun()
     int m = 2;
     if(m > t)
     {
-        m = m - t;
+        puts(str2);
     }
     else
     {
@@ -41,7 +41,12 @@ int fun1(int a)
 int main()
 {
     fun();
-    fun1(b);
+    a = fun1(b);
+    if(a == 20)
+    {
+        puts(str);
+        puts(str2);
+    }
     puts(str);
     return 0;
 }

@@ -670,12 +670,41 @@ void codeGen()
                 emit("\tdq 0");
             else
             {
-                if (i->data->type == ND_STR)
+                if (i->data->type == ND_STR) //字符串处理
                 {
-                    auto&& res = emitString(i->data->name);
+                    auto&& res = emitString(i->data->name); // "abc\nabc" -> "abc",10,"abc",0
                     emit("\tdq " + res);
                     emit("\n" + res + " : \n");
-                    emit("\tdb \"" + i->data->name + "\"");
+                    fprintf(outasm, "\tdb  ");
+                    for (size_t kc = 0; kc < i->data->name.size(); kc++)
+                    {
+                        auto&& ch = i->data->name[kc];
+                        if (ch == '\\')
+                        {
+                            kc += 1;
+                            ch = i->data->name[kc];
+                            if (ch == 't')
+                            {
+                                fprintf(outasm, to_string('\t').c_str());
+                            }
+                            else if (ch == '\\')
+                            {
+                                fprintf(outasm, to_string('\\').c_str());
+                            }
+                            else
+                            {
+                                fprintf(outasm, to_string('\n').c_str());
+                            }
+                        }
+                        else
+                        {
+                            fprintf(outasm, to_string(ch).c_str());
+                        }
+                        fprintf(outasm, ",");
+                    }
+                    fprintf(outasm, "0");
+                    // emit("\tdb \"" + i->data->name + "\"");
+                    // fprintf(outasm, str.c_str());
                 }
                 else
                 {
