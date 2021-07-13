@@ -12,7 +12,11 @@ struct A{
 }sa;
 
 
-
+void puts(char *str)
+{
+    ;
+    // puts()
+}
 
 void fun()
 {
@@ -38,5 +42,6 @@ int main()
 {
     fun();
     fun1(b);
+    puts(str);
     return 0;
 }

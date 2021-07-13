@@ -79,6 +79,7 @@ pair<int, string> tySize(Type* t)
 }
 
 queue<string> regQueue;
+unordered_set<string> allReg;
 void initRegQueue()
 {
     while (not regQueue.empty())
@@ -92,10 +93,22 @@ void initRegQueue()
     regQueue.push("r9d");
     regQueue.push("r10d");
     regQueue.push("r11d");
+    allReg.clear();
+    int cnt = regQueue.size();
+    while (cnt--)
+    {
+        auto p = regQueue.front();
+        allReg.insert(p);
+        regQueue.pop();
+        regQueue.push(p);
+    }
 }
+
+string beforReg;
 string getReg()
 {
-    auto t = regQueue.front();
+    auto t   = regQueue.front();
+    beforReg = regQueue.back();
     regQueue.pop();
     regQueue.push(t);
     return t;
@@ -109,6 +122,37 @@ struct Operation
 void genStatementList(vector<Node*>* arr, vector<string>& code, bool flag = false);
 unordered_map<string, int> offset;
 int labelNum = 0;
+
+void to64bits(string& a)
+{
+    if (allReg.find(a) != allReg.end())
+    {
+        if (a[0] == 'e')
+            a[0] = 'r';
+        else if (a.back() == 'd')
+        {
+            a.back() = ' ';
+        }
+        return;
+    }
+    auto p = a.find("DWORD");
+    if (p != string::npos)
+    {
+        a[p] = 'Q';
+    }
+    return;
+}
+
+void removeDWORD(string& a, string& b)
+{
+    auto p1 = a.find("DWORD");
+    auto p2 = b.find("DWORD");
+    if (p1 != string::npos and p2 != string::npos)
+    {
+        b = b.substr(p2 + 5);
+    }
+    return;
+}
 
 Operation genStatement(Node* i, vector<string>& code)
 {
@@ -139,18 +183,21 @@ Operation genStatement(Node* i, vector<string>& code)
     }
     case ND_RETURN: {
         code.push_back("mov\trsp,rbp");
-        // code.push_back("pop rbp");
         if (i->expresson)
         {
             auto&& res = genStatement(i->expresson, code);
-            code.push_back("push\t" + res.lhs);
+            code.push_back("mov\t" + getReg() + "," + res.lhs);
+            // to64bits(res.lhs);
+            // code.push_back("push\t" + res.lhs);
         }
+        code.push_back("pop\trbp");
         code.push_back("ret");
         break;
     }
     case ND_ASSIGN: {
         auto&& res2 = genStatement(i->rhs, code);
         auto&& res1 = genStatement(i->lhs, code);
+        removeDWORD(res1.lhs, res2.lhs);
         code.push_back("mov\t" + res1.lhs + "," + res2.lhs);
         return {"=", res1.lhs, ""};
     }
@@ -324,7 +371,9 @@ Operation genStatement(Node* i, vector<string>& code)
     case ND_GREAT: {
         auto&& res1 = genStatement(i->lhs, code);
         auto&& res2 = genStatement(i->rhs, code);
-        code.push_back("cmp\t" + res1.lhs + "," + res2.lhs);
+        auto reg    = getReg();
+        code.push_back("mov\t" + reg + "," + res1.lhs);
+        code.push_back("cmp\t" + reg + "," + res2.lhs);
         return {"flag", "", ""};
     }
     case ND_ADD: {
@@ -415,7 +464,22 @@ Operation genStatement(Node* i, vector<string>& code)
         return {"MUL", reg, ""};
     }
     case ND_CALL: {
+        /*
+        mov     rcx,[rel str]
+        sub     rsp,28h
+        call    puts                            ; puts(message)
+        add     rsp,28h
+        */
         code.push_back("sub     rsp, 28h");
+        if (i->name == "puts")
+        {
+            auto&& res    = genStatement(i->args->at(0), code);
+            string substr = res.lhs.substr(res.lhs.find("["));
+            code.push_back("mov\trcx," + substr);
+            code.push_back("call\tputs");
+            code.push_back("add     rsp,28h");
+            return {"CALL", "", ""};
+        }
         bool flag = false;
         int cnt   = 0;
         for (auto&& funs : prog->funcs)
@@ -426,6 +490,7 @@ Operation genStatement(Node* i, vector<string>& code)
                 {
                     cnt++;
                     auto&& res = genStatement(fa, code);
+                    to64bits(res.lhs);
                     code.push_back("push\t" + res.lhs);
                 }
                 if (funs->returnType->ty != VOID)
@@ -439,16 +504,18 @@ Operation genStatement(Node* i, vector<string>& code)
         auto reg = getReg();
         if (flag)
         {
+            to64bits(reg);
             code.push_back("pop\t" + reg);
         }
         for (int i = 0; i < cnt; i++)
         {
             auto reg2 = getReg();
+            to64bits(reg2);
             code.push_back("pop\t" + reg2);
         }
 
         code.push_back("add     rsp, 28h ");
-        return {"CALL", reg, ""};
+        return {"CALL", beforReg, ""};
         break;
     }
     case ND_STR: // wait for
@@ -466,7 +533,10 @@ void genStatementList(vector<Node*>* arr, vector<string>& code, bool flag)
     int varSize = 0;
     // code.push_back("push\trbp");
     if (flag)
+    {
+        code.push_back("push\trbp");
         code.push_back("mov\trbp,rsp");
+    }
     for (auto&& i : *(arr))
     {
         switch (i->type)
@@ -482,7 +552,9 @@ void genStatementList(vector<Node*>* arr, vector<string>& code, bool flag)
             if (i->var->data)
             {
                 auto&& res = genStatement(i->var->data, code);
-                code.push_back("mov\tWORD [rbp" + to_string(offset[i->name]) + "]," + res.lhs + "");
+                string l   = "DWORD [rbp" + to_string(offset[i->name]) + "]";
+                removeDWORD(l, res.lhs);
+                code.push_back("mov\t " + l + "," + res.lhs);
             }
             break;
         }
@@ -518,7 +590,10 @@ void genStatementList(vector<Node*>* arr, vector<string>& code, bool flag)
         code.push_back("add\trsp," + to_string(varSize));
     }
     if (flag)
+    {
         code.push_back("mov\trsp,rbp");
+        code.push_back("pop\trbp");
+    }
 }
 
 /*
@@ -537,18 +612,18 @@ vector<string> genFunction(Function* f)
     initRegQueue();
     offset.clear();
     auto&& arr = *(f->paraName);
-    int off    = 0;
+    int off    = 0x10; // Return address -> 8h     rbp -> 8h   (bytes)
     for (int i = arr.size() - 1; i >= 0; i--)
     {
         offset[arr[i]] = off;
         off += 4;
     }
-
     vector<string> code;
     auto pb = [&](const string& str) { code.emplace_back(move(str)); };
     pb(f->name + " :\n\n");
     // sub rsp, 28h;
     genStatementList(f->compound->statementList, code, true);
+    code.push_back("ret");
     return code;
 }
 
@@ -647,16 +722,16 @@ void codeGen()
                     break;
                 case BOOL:
                 case CHAR:
-                    emit("\tdb 0");
+                    emit("\tdb 0\n");
                     break;
                 case INT:
-                    emit("\tdd 0");
+                    emit("\tdd 0\n");
                     break;
                 case DOUBLE:
                 case PTR:    //待处理
                 case ARY:    //待处理 arr :   times 10 db 2
                 case STRUCT: //待处理
-                    emit("\tdq 0");
+                    emit("\tdq 0\n");
                     break;
                 default:
                     break;
@@ -679,6 +754,8 @@ void codeGen()
         {
             p = codes.size();
         }
+        if (i->compound == nullptr or i->name == "puts")
+            continue;
         codes.emplace_back(genFunction(i));
     }
     for (auto&& i : codes[p])
