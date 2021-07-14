@@ -48,6 +48,11 @@ void outPutParse(bool flag = false)
     {
         printf("%s returnType: %d \n", i->name.c_str(), i->returnType->ty);
         printf("It has %lld params and function's address is %p\n", i->params->size(), i->compound);
+        for (auto&& j : *(i->compound->statementList))
+        {
+            cout << j->type << ' ' << j->name << endl;
+        }
+        cout << "-----------------------------" << endl;
     }
     cout << endl;
 }

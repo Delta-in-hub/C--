@@ -1,4 +1,9 @@
-_Bool flag;
+int flag;
+
+void puts(char* a)
+{
+    ;
+}
 
 int main()
 {
@@ -6,16 +11,17 @@ int main()
     flag = 1;
     while(flag != 0)
     {
+        puts("cnt++");
         cnt++;
         if(cnt > 10)
         {
             flag = 0;
         }
     }
-    // for(int i=0;i < cnt;i++)
     int i = 0;
     for(i;i<cnt ;i++)
     {
+        puts("cnt--");
         cnt--;
     }
     return 0;

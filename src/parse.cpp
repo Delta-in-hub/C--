@@ -1113,8 +1113,9 @@ Node* compound_statement()
                  consume("struct"))
         {
             --pos;
-            auto decl        = declaration_list(true); //局部变量
-            t->statementList = new std::vector<Node*>;
+            auto decl = declaration_list(true); //局部变量
+            if (t->statementList == nullptr)
+                t->statementList = new std::vector<Node*>;
             for (auto&& i : *decl)
             {
                 auto nd   = new Node{};

@@ -162,6 +162,20 @@ void removeDWORD(string& a, string& b)
     return;
 }
 
+bool twoMem(const string& a, const string& b)
+{
+    bool flag1 = false, flag2 = false;
+    if (a.find('[') != string::npos and a.find(']') != string::npos)
+    {
+        flag1 = true;
+    }
+    if (b.find('[') != string::npos and b.find(']') != string::npos)
+    {
+        flag2 = true;
+    }
+    return flag1 and flag2;
+}
+
 Operation genStatement(Node* i, vector<string>& code)
 {
     if (i == nullptr)
@@ -209,8 +223,17 @@ Operation genStatement(Node* i, vector<string>& code)
     case ND_ASSIGN: {
         auto&& res2 = genStatement(i->rhs, code);
         auto&& res1 = genStatement(i->lhs, code);
-        removeDWORD(res1.lhs, res2.lhs);
-        code.push_back("mov\t" + res1.lhs + "," + res2.lhs);
+        if (twoMem(res1.lhs, res2.lhs))
+        {
+            auto reg = getReg();
+            code.push_back("mov\t" + reg + "," + res2.lhs);
+            code.push_back("mov\t" + res1.lhs + "," + reg);
+        }
+        else
+        {
+            removeDWORD(res1.lhs, res2.lhs);
+            code.push_back("mov\t" + res1.lhs + "," + res2.lhs);
+        }
         return {"=", res1.lhs, ""};
     }
     case ND_IF: {
@@ -219,127 +242,127 @@ Operation genStatement(Node* i, vector<string>& code)
             break;
         }
         auto&& res = genStatement(i->condition, code);
+        int label  = labelNum++;
         switch (i->condition->type)
         {
         case ND_EQ: {
-            code.push_back("je\t.IF_THEN_" + to_string(labelNum));
+            code.push_back("je\t.IF_THEN_" + to_string(label));
             break;
         }
         case ND_NE: {
-            code.push_back("jne\t.IF_THEN_" + to_string(labelNum));
+            code.push_back("jne\t.IF_THEN_" + to_string(label));
             break;
         }
         case ND_LE: {
-            code.push_back("jle\t.IF_THEN_" + to_string(labelNum));
+            code.push_back("jle\t.IF_THEN_" + to_string(label));
             break;
         }
         case ND_GE: {
-            code.push_back("jge\t.IF_THEN_" + to_string(labelNum));
+            code.push_back("jge\t.IF_THEN_" + to_string(label));
             break;
         }
         case ND_LESS: {
-            code.push_back("jl\t.IF_THEN_" + to_string(labelNum));
+            code.push_back("jl\t.IF_THEN_" + to_string(label));
             break;
         }
         case ND_GREAT: {
-            code.push_back("jg\t.IF_THEN_" + to_string(labelNum));
+            code.push_back("jg\t.IF_THEN_" + to_string(label));
             break;
         }
         default:
             break;
         }
         auto&& res1 = genStatement(i->els, code);
-        code.push_back("jmp\t.IF_END_" + to_string(labelNum));
-        code.push_back(".IF_THEN_" + to_string(labelNum) + ": \n");
+        code.push_back("jmp\t.IF_END_" + to_string(label));
+        code.push_back(".IF_THEN_" + to_string(label) + ": \n");
         auto&& res2 = genStatement(i->then, code);
-        code.push_back(".IF_END_" + to_string(labelNum) + ": \n");
-        labelNum++;
+        code.push_back(".IF_END_" + to_string(label) + ": \n");
         break;
     }
     case ND_DO_WHILE: {
         if (i->body == nullptr)
             break;
-        code.push_back(".WHILE_START_" + to_string(labelNum) + " :\n");
+        int label = labelNum++;
+        code.push_back(".WHILE_START_" + to_string(label) + " :\n");
         auto&& res = genStatement(i->condition, code);
         switch (i->condition->type)
         {
         case ND_EQ: {
-            code.push_back("je\t.WHILE_THEN_" + to_string(labelNum));
+            code.push_back("je\t.WHILE_THEN_" + to_string(label));
             break;
         }
         case ND_NE: {
-            code.push_back("jne\t.WHILE_THEN_" + to_string(labelNum));
+            code.push_back("jne\t.WHILE_THEN_" + to_string(label));
             break;
         }
         case ND_LE: {
-            code.push_back("jle\t.WHILE_THEN_" + to_string(labelNum));
+            code.push_back("jle\t.WHILE_THEN_" + to_string(label));
             break;
         }
         case ND_GE: {
-            code.push_back("jge\t.WHILE_THEN_" + to_string(labelNum));
+            code.push_back("jge\t.WHILE_THEN_" + to_string(label));
             break;
         }
         case ND_LESS: {
-            code.push_back("jl\t.WHILE_THEN_" + to_string(labelNum));
+            code.push_back("jl\t.WHILE_THEN_" + to_string(label));
             break;
         }
         case ND_GREAT: {
-            code.push_back("jg\t.WHILE_THEN_" + to_string(labelNum));
+            code.push_back("jg\t.WHILE_THEN_" + to_string(label));
             break;
         }
         default:
             break;
         }
-        code.push_back("jmp\t.WHILE_END_" + to_string(labelNum));
-        code.push_back(".WHILE_THEN_" + to_string(labelNum) + " : \n");
+        code.push_back("jmp\t.WHILE_END_" + to_string(label));
+        code.push_back(".WHILE_THEN_" + to_string(label) + " : \n");
         auto&& res1 = genStatement(i->body, code);
-        code.push_back("jmp\t.WHILE_START_" + to_string(labelNum));
-        code.push_back(".WHILE_END_" + to_string(labelNum) + " :\n");
-        labelNum++;
+        code.push_back("jmp\t.WHILE_START_" + to_string(label));
+        code.push_back(".WHILE_END_" + to_string(label) + " :\n");
         break;
     }
     case ND_FOR: {
         if (i->body == nullptr)
             break;
+        int label = labelNum++;
         genStatement(i->init, code);
-        code.push_back(".FOR_START_" + to_string(labelNum) + " : \n");
+        code.push_back(".FOR_START_" + to_string(label) + " : \n");
         auto&& res = genStatement(i->condition, code);
         switch (i->condition->type)
         {
         case ND_EQ: {
-            code.push_back("je\t.FOR_THEN_" + to_string(labelNum));
+            code.push_back("je\t.FOR_THEN_" + to_string(label));
             break;
         }
         case ND_NE: {
-            code.push_back("jne\t.FOR_THEN_" + to_string(labelNum));
+            code.push_back("jne\t.FOR_THEN_" + to_string(label));
             break;
         }
         case ND_LE: {
-            code.push_back("jle\t.FOR_THEN_" + to_string(labelNum));
+            code.push_back("jle\t.FOR_THEN_" + to_string(label));
             break;
         }
         case ND_GE: {
-            code.push_back("jge\t.FOR_THEN_" + to_string(labelNum));
+            code.push_back("jge\t.FOR_THEN_" + to_string(label));
             break;
         }
         case ND_LESS: {
-            code.push_back("jl\t.FOR_THEN_" + to_string(labelNum));
+            code.push_back("jl\t.FOR_THEN_" + to_string(label));
             break;
         }
         case ND_GREAT: {
-            code.push_back("jg\t.FOR_THEN_" + to_string(labelNum));
+            code.push_back("jg\t.FOR_THEN_" + to_string(label));
             break;
         }
         default:
             break;
         }
-        code.push_back("jmp\t.FOR_END_" + to_string(labelNum));
-        code.push_back(".FOR_THEN_" + to_string(labelNum) + " : \n");
+        code.push_back("jmp\t.FOR_END_" + to_string(label));
+        code.push_back(".FOR_THEN_" + to_string(label) + " : \n");
         genStatement(i->body, code);
         genStatement(i->inc, code);
-        code.push_back("jmp\t.FOR_START_" + to_string(labelNum));
-        code.push_back(".FOR_END_" + to_string(labelNum) + " : \n");
-        labelNum++;
+        code.push_back("jmp\t.FOR_START_" + to_string(label));
+        code.push_back(".FOR_END_" + to_string(label) + " : \n");
         break;
     }
     case ND_INC: {
@@ -872,6 +895,12 @@ void codeGen(char* path)
             continue;
         codes.emplace_back(genFunction(i));
     }
+    if (p >= int(codes.size()))
+    {
+        printf("Don't exist main function");
+        exit(1);
+    }
+
     emit("\n\n        global  main\n        extern  puts\n        extern  getchar\nsection .text\n");
     for (auto&& i : codes[p])
     {

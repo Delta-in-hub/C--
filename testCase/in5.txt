@@ -1,4 +1,4 @@
-double fun(int a)
+int fun(int a)
 {
     a = 12;
     return a + 10.0;
@@ -10,7 +10,7 @@ int main()
     while(1)
     {
         int a;
-        int f = fun(a);  //bug fixed
+        int f = fun(a);  //bug fixed optimize
     }
     return 0;
 }

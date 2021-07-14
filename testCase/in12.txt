@@ -4,18 +4,32 @@ int *p;
 
 void puts(char* str)
 {
-    ;
+    /* Reserved Function. Link it to C library later. C:\WINDOWS\System32\msvcrt.dll */
+}
+int getchar()
+{
+    /* Reserved Function. Link it to C library later. C:\WINDOWS\System32\msvcrt.dll */
 }
 
 int main()
 {
-    arr[0] = 10;
-    arr[1] = 10;
+    arr[0] = 1+1+1+1+1+2+2+1;
+    arr[1] = 10 - 10 + 20 - 2 * 10 + arr[0];
     p = &a;
     *p = 20;
     if(a == arr[0] + arr[1])
     {
         puts("a == 10");
     }
+    while(a <= 23)
+    {
+        puts("While Looping");
+        a++;
+    }
+    for(a = 5; a != 0; a-- )
+    {
+        puts("For Looping");
+    }
+    getchar();
     return 0;
 }

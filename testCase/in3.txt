@@ -18,7 +18,7 @@ int main()
     for(i = 0; i< cnt ;i++)
     {
         struct Student a;
-        a.name = "hello";
+        a.name = "hello"; //Only for parsing
         a.year = i;
     }
     return 0;
