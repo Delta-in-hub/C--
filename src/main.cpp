@@ -52,38 +52,96 @@ void outPutParse(bool flag = false)
     cout << endl;
 }
 
-void usage()
-{
-    printf("Usage: cc <FilePath>\n");
-    getchar();
-    exit(1);
-}
+bool debugMode = false, keepAsm = false, keepObj = false;
+char* outPutFile = nullptr;
+std::string gccPath("gcc"), nasmPath("nasm");
 
 int main(int argc, char** argv)
 {
     if (argc == 1)
     {
-        path = "../testCase/in11.txt";
+        printf("c--.exe: fatal: no input file specified\nType c--.exe -h for help.");
+        exit(1);
+        // path = "../testCase/in11.txt";
     }
     else if (argc == 2)
     {
-        path = argv[1];
+        char* arg = argv[1];
+        if (strcmp(arg, "-v") == 0)
+        {
+            printf("C-- version 0.1.0 compiled on July 14 2021\n");
+            printf("Using C-like grammar and Generate Windows x86_64 Executable File\n");
+            printf("See https://github.com/Delta-in-hub/complierTeam for more information\n");
+            exit(1);
+        }
+        else if (strcmp(arg, "-h") == 0)
+        {
+            puts("Usage: c--.exe [-d] [-s] [-c] <SourceFile> [-o <TargetFile>] [-n <NasmPath>] [-g <GccPath>]");
+            puts("");
+            puts("  -d                       Enable Debug Mode.");
+            puts("  -s                       Reserve Assemble File.");
+            puts("  -c                       Reserve Object File.");
+            puts("  -o <TargetFile>          Place the output into <TargetFile>.");
+            puts("  -n <NasmPath>            Set nasm.exe path from <NasmPath>.");
+            puts("  -g <GccPath>            Set gcc.exe path from <GccPath>.");
+            puts("\nDefault:\n  Disable Debug Mode.Do not Reserve .asm and .obj File.Place the output into the same "
+                 "folder of <SourceFile>");
+            printf("\nSee https://github.com/Delta-in-hub/complierTeam for more information\n");
+            exit(1);
+        }
+        else
+        {
+            path = arg;
+        }
     }
     else
     {
-        usage();
+        for (int i = 1; i < argc; i++)
+        {
+            char* str = argv[i];
+            if (strcmp(str, "-d") == 0)
+            {
+                debugMode = true;
+            }
+            else if (strcmp(str, "-s") == 0)
+            {
+                keepAsm = true;
+            }
+            else if (strcmp(str, "-c") == 0)
+            {
+                keepObj = true;
+            }
+            else if (strcmp(str, "-o") == 0)
+            {
+                outPutFile = argv[i + 1];
+                i++;
+            }
+            else if (strcmp(str, "-n") == 0)
+            {
+                nasmPath = string(argv[i + 1]);
+                i++;
+            }
+            else if (strcmp(str, "-g") == 0)
+            {
+                gccPath = string(argv[i + 1]);
+                i++;
+            }
+            else
+            {
+                path = str;
+            }
+        }
     }
+
     const char* str;
     str      = openFile(path);
     buferror = str; // for parse error process
     scan(str);
-    outPutToken(true);
+    outPutToken(debugMode);
     parse();
-    outPutParse(true);
+    outPutParse(debugMode);
     optimize();
-    // getchar();
-    cout << endl << endl << "CODE GEN " << endl;
-    codeGen(); //.asm file done
+    codeGen(outPutFile); //.asm file done
     asmToExe();
     return 0;
 }

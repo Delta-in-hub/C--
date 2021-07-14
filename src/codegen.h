@@ -5,6 +5,6 @@
 
 extern std::string asmFilePath;
 
-void codeGen();
+void codeGen(char* path);
 
 #endif

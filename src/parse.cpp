@@ -45,20 +45,22 @@ Node* primary_expression();
 
 void expect(const std::string& tokentype, const std::string& error = "Universal Error")
 {
-#ifdef DEBUG__
-    if (not(pos >= 0 and pos < tokenArr.size()))
+
+    if (debugMode)
     {
-        std::printf("%d out of range of TokenArr");
-        getchar();
-        exit(1);
+        if (not(pos >= 0 and pos < tokenArr.size()))
+        {
+            std::printf("%d out of range of TokenArr");
+            getchar();
+            exit(1);
+        }
+        if (tokenType.find(tokentype) == tokenType.end())
+        {
+            std::printf("%s does not in tokenType unordreed map", tokentype.c_str());
+            getchar();
+            exit(1);
+        }
     }
-    if (tokenType.find(tokentype) == tokenType.end())
-    {
-        std::printf("%s does not in tokenType unordreed map", tokentype.c_str());
-        getchar();
-        exit(1);
-    }
-#endif
 
     auto&& t = tokenArr[pos];
     if (t.type == tokenType.at(tokentype))
@@ -77,20 +79,21 @@ void expect(const std::string& tokentype, const std::string& error = "Universal 
 //向前展望一个符号
 bool consume(const std::string& tokentype)
 {
-#ifdef DEBUG__
-    if (not(pos >= 0 and pos < tokenArr.size()))
+    if (debugMode)
     {
-        std::printf("%d out of range of TokenArr");
-        getchar();
-        exit(1);
+        if (not(pos >= 0 and pos < tokenArr.size()))
+        {
+            std::printf("%d out of range of TokenArr");
+            getchar();
+            exit(1);
+        }
+        if (tokenType.find(tokentype) == tokenType.end())
+        {
+            std::printf("%s does not in tokenType unordreed map", tokentype.c_str());
+            getchar();
+            exit(1);
+        }
     }
-    if (tokenType.find(tokentype) == tokenType.end())
-    {
-        std::printf("%s does not in tokenType unordreed map", tokentype.c_str());
-        getchar();
-        exit(1);
-    }
-#endif
     auto&& t = tokenArr[pos];
     if (t.type != tokenType.at(tokentype))
         return false;
@@ -100,14 +103,15 @@ bool consume(const std::string& tokentype)
 
 Token& nowToken(int p = 0)
 {
-#ifdef DEBUG__
-    if (not(pos + p >= 0 and pos + p < tokenArr.size()))
+    if (debugMode)
     {
-        std::printf("%d out of range of TokenArr");
-        getchar();
-        exit(1);
+        if (not(pos + p >= 0 and pos + p < tokenArr.size()))
+        {
+            std::printf("%d out of range of TokenArr");
+            getchar();
+            exit(1);
+        }
     }
-#endif
     return tokenArr.at(pos + p);
 }
 
@@ -414,9 +418,10 @@ void parse()
     {
         translation_unit();
     }
-#ifdef DEBUG__
-    std::cout << "Complier done" << std::endl;
-#endif
+    if (debugMode)
+    {
+        std::cout << "Complier done" << std::endl;
+    }
 }
 
 /*

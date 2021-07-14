@@ -44,9 +44,10 @@ void errorToken(const char* buf, const char* start, const char* end, const char*
         // cout << msg << "\t" << path << "\t" << line << "\t" << col << endl;
         int linelen = strchr(p, '\n') - s;
         printf("%.*s\n", linelen, s);
-#ifdef DEBUG__
-        getchar();
-#endif
+        if (debugMode)
+        {
+            getchar();
+        }
         exit(1);
         // return;
     }

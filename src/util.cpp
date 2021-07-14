@@ -21,7 +21,10 @@ void asmToExe()
     }
 
     char cmd[100] = {0};
-    sprintf(cmd, "nasm -g -fwin64 %sasm", asmFilePath.c_str());
+    if (debugMode)
+        sprintf(cmd, "%s -g -fwin64 %sasm", nasmPath.c_str(), asmFilePath.c_str());
+    else
+        sprintf(cmd, "%s -fwin64 %sasm", nasmPath.c_str(), asmFilePath.c_str());
     system(cmd);
     if (not fileExist((asmFilePath + "obj").c_str()))
     {
@@ -29,7 +32,7 @@ void asmToExe()
         getchar();
         exit(1);
     }
-    sprintf(cmd, "gcc %sobj -o %sexe", asmFilePath.c_str(), asmFilePath.c_str());
+    sprintf(cmd, "%s %sobj -o %sexe", gccPath.c_str(), asmFilePath.c_str(), asmFilePath.c_str());
     system(cmd);
     if (not fileExist((asmFilePath + "exe").c_str()))
     {
@@ -37,9 +40,8 @@ void asmToExe()
         getchar();
         exit(1);
     }
-    if (false)
-    {
+    if (not keepAsm)
         remove((asmFilePath + "asm").c_str());
+    if (not keepObj)
         remove((asmFilePath + "obj").c_str());
-    }
 }

@@ -656,10 +656,11 @@ void optimize()
         }
     }
 
-#ifdef DEBUG__
-    for (auto&& i : varInitVal)
+    if (debugMode)
     {
-        cout << i.first->name << ' ' << i.second.first << ' ' << i.second.second << endl;
+        for (auto&& i : varInitVal)
+        {
+            cout << i.first->name << ' ' << i.second.first << ' ' << i.second.second << endl;
+        }
     }
-#endif
 }

@@ -7,10 +7,14 @@ using namespace std;
 std::string asmFilePath{};
 
 FILE* outasm = nullptr;
-void fileInit()
+void fileInit(char* outPath)
 {
     using namespace std;
     string outputPath(path);
+    if (outPath != nullptr)
+    {
+        outputPath = string(outPath);
+    }
     size_t pos = 0;
     for (int i = outputPath.size() - 1; i >= 0; i--)
     {
@@ -714,9 +718,9 @@ vector<string> genFunction(Function* f)
     return code;
 }
 
-void codeGen()
+void codeGen(char* path)
 {
-    fileInit();
+    fileInit(path);
     emit("section .data");
     for (auto&& i : prog->gvars)
     {

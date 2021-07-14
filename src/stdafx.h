@@ -1,9 +1,6 @@
 #ifndef STDAFX
 #define STDAFX
 //包含通用的头文件
-
-#define DEBUG__
-
 #include <algorithm>
 #include <ciso646>
 #include <cmath>
@@ -24,5 +21,9 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+extern bool debugMode, keepAsm, keepObj;
+extern char* outPutFile;
+extern std::string gccPath, nasmPath;
 
 #endif
