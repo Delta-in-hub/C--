@@ -11,6 +11,7 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
     case ND_NUM:
     case ND_DNUM:
     case ND_CHAR:
+        node->constant = true;
         return {true, node->val, node->dval};
         break;
     case ND_STR: // name = str , ctype = char*
@@ -20,7 +21,9 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
 
         if (inInitliza and varInitVal.find(node->var) != varInitVal.end())
         {
-            auto&& t = varInitVal.find(node->var)->second;
+            auto&& t       = varInitVal.find(node->var)->second;
+            node->constant = true;
+            node->val      = t.first;
             return {true, t.first, t.second};
         }
         else
@@ -35,8 +38,18 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
         //待处理
         break;
     case ND_EQ: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -48,13 +61,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a == b;
             return {true, a == b, 0};
         }
         break;
     }
     case ND_NE: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -66,13 +91,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a != b;
             return {true, a != b, 0};
         }
         break;
     }
     case ND_LE: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -84,13 +121,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a <= b;
             return {true, a <= b, 0};
         }
         break;
     }
     case ND_GE: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -102,13 +151,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a >= b;
             return {true, a >= b, 0};
         }
         break;
     }
     case ND_LESS: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -120,13 +181,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a < b;
             return {true, a < b, 0};
         }
         break;
     }
     case ND_GREAT: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -138,13 +211,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a > b;
             return {true, a > b, 0};
         }
         break;
     }
     case ND_ADD: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -156,13 +241,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a + b;
             return {true, a + b, a + b};
         }
         break;
     }
     case ND_SUB: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -174,13 +271,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a - b;
             return {true, a - b, a - b};
         }
         break;
     }
     case ND_LOGAND: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -192,13 +301,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a && b;
             return {true, a && b, a && b};
         }
         break;
     }
     case ND_LOGOR: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -210,12 +331,14 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a || b;
             return {true, a || b, a || b};
         }
         break;
     }
     case ND_NEG: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
         if (get<0>(c1))
         {
             double a, b;
@@ -223,12 +346,14 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 a = get<2>(c1);
             else
                 a = get<1>(c1);
+            node->constant = true;
+            node->val      = -a;
             return {true, -a, -a};
         }
         break;
     }
     case ND_NOT: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
         if (get<0>(c1))
         {
             double a, b;
@@ -236,13 +361,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 a = get<2>(c1);
             else
                 a = get<1>(c1);
+            node->constant = true;
+            node->val      = !a;
             return {true, !a, !a};
         }
         break;
     }
     case ND_MUL: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -254,13 +391,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a * b;
             return {true, a * b, a * b};
         }
         break;
     }
     case ND_DIV: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -272,13 +421,25 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = a / b;
             return {true, a / b, a / b};
         }
         break;
     }
     case ND_MOD: {
-        auto&& c1 = constantCalculate(node->lhs,inInitliza);
-        auto&& c2 = constantCalculate(node->rhs,inInitliza);
+        auto&& c1 = constantCalculate(node->lhs, inInitliza);
+        auto&& c2 = constantCalculate(node->rhs, inInitliza);
+        if (get<0>(c1))
+        {
+            node->lhs->constant = true;
+            node->lhs->val      = get<1>(c1);
+        }
+        if (get<0>(c2))
+        {
+            node->rhs->constant = true;
+            node->rhs->val      = get<1>(c2);
+        }
         if (get<0>(c1) and get<0>(c2))
         {
             double a, b;
@@ -290,6 +451,8 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
                 b = get<2>(c2);
             else
                 b = get<1>(c2);
+            node->constant = true;
+            node->val      = int(a) % int(b);
             return {true, int(a) % int(b), int(a) % int(b)};
         }
         break;
@@ -314,7 +477,9 @@ void varInitOptimize(Var* i)
             {
                 a = get<2>(t);
             }
-            varInitVal[i] = {a, get<2>(t)};
+            varInitVal[i]     = {a, get<2>(t)};
+            i->data->constant = true;
+            i->data->val      = a;
         }
     }
 }
@@ -359,6 +524,15 @@ bool statementOptimize(Node* i)
         return false;
     }
     case ND_CALL: {
+        for (auto&& m : prog->funcs)
+        {
+            if (m->name == "puts" or m->name == "getchar")
+                continue;
+            if (m->name == i->name and m->compound == nullptr)
+            {
+                return true;
+            }
+        }
         for (auto&& j : *(i->args))
         {
             constantOptimize(j);
@@ -473,6 +647,7 @@ void optimize()
     {
         varInitOptimize(i);
     }
+
     for (auto&& i : prog->funcs)
     {
         if (statementListOptimize(i->compound->statementList))

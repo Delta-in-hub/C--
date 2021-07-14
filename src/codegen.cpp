@@ -162,6 +162,10 @@ Operation genStatement(Node* i, vector<string>& code)
 {
     if (i == nullptr)
         return {"", "", ""};
+    if (i->constant == true)
+    {
+        return {"NUM", to_string(i->val), ""};
+    }
     switch (i->type)
     {
     case ND_COMP_STMT:
@@ -488,12 +492,64 @@ Operation genStatement(Node* i, vector<string>& code)
         code.push_back("sub     rsp, 28h");
         if (i->name == "puts")
         {
-            auto&& res    = genStatement(i->args->at(0), code);
-            string substr = res.lhs.substr(res.lhs.find("["));
-            code.push_back("mov\trcx," + substr);
-            code.push_back("call\tputs");
+            if (i->args->at(0)->type == ND_STR)
+            {
+                auto&& res = emitString(i->args->at(0)->name); // "abc\nabc" -> "abc",10,"abc",0
+                emit("\n" + res + " : \n");
+                fprintf(outasm, "\tdb  ");
+                for (size_t kc = 0; kc < i->args->at(0)->name.size(); kc++)
+                {
+                    auto&& ch = i->args->at(0)->name[kc];
+                    if (ch == '\\')
+                    {
+                        kc += 1;
+                        ch = i->args->at(0)->name[kc];
+                        if (ch == 't')
+                        {
+                            fprintf(outasm, to_string('\t').c_str());
+                        }
+                        else if (ch == '\\')
+                        {
+                            fprintf(outasm, to_string('\\').c_str());
+                        }
+                        else
+                        {
+                            fprintf(outasm, to_string('\n').c_str());
+                        }
+                    }
+                    else
+                    {
+                        fprintf(outasm, to_string(ch).c_str());
+                    }
+                    fprintf(outasm, ",");
+                }
+                fprintf(outasm, "0");
+                code.push_back("mov\trcx," + res);
+                code.push_back("call\tputs");
+                code.push_back("add     rsp,28h");
+                return {"CALL", "", ""};
+            }
+            else
+            {
+                auto&& res    = genStatement(i->args->at(0), code);
+                string substr = res.lhs.substr(res.lhs.find("["));
+                code.push_back("mov\trcx," + substr);
+                code.push_back("call\tputs");
+                code.push_back("add     rsp,28h");
+                return {"CALL", "", ""};
+            }
+        }
+        if (i->name == "getchar")
+        {
+            code.push_back("push\trax");
+            code.push_back("call\tgetchar");
+            auto reg = getReg();
+            if (reg == "eax")
+                reg = getReg();
+            code.push_back("mov\t" + reg + ",eax");
+            code.push_back("pop\trax");
             code.push_back("add     rsp,28h");
-            return {"CALL", "", ""};
+            return {"CALL", reg, ""};
         }
         bool flag = false;
         int cnt   = 0;
@@ -804,8 +860,6 @@ void codeGen()
         }
     }
 
-    emit("\n\n        global  main\n        extern  puts\n        section .text\n");
-
     vector<vector<string>> codes;
     int p = 0;
     for (auto&& i : prog->funcs)
@@ -814,10 +868,11 @@ void codeGen()
         {
             p = codes.size();
         }
-        if (i->compound == nullptr or i->name == "puts")
+        if (i->compound == nullptr or i->name == "puts" or i->name == "getchar")
             continue;
         codes.emplace_back(genFunction(i));
     }
+    emit("\n\n        global  main\n        extern  puts\n        extern  getchar\nsection .text\n");
     for (auto&& i : codes[p])
     {
         if (i[0] == '.' or i.find(':') != string::npos)

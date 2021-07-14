@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 {
     if (argc == 1)
     {
-        path = "../testCase/in10.txt";
+        path = "../testCase/in11.txt";
     }
     else if (argc == 2)
     {
