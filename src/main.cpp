@@ -71,7 +71,7 @@ int main(int argc, char** argv)
         {
             printf("C-- version 0.1.0 compiled on July 14 2021\n");
             printf("Using C-like grammar and Generate Windows x86_64 Executable File\n");
-            printf("See https://github.com/Delta-in-hub/complierTeam for more information\n");
+            printf("See https://github.com/Delta-in-hub/C-- for more information\n");
             exit(1);
         }
         else if (strcmp(arg, "-h") == 0)
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
             puts("  -g <GccPath>             Set gcc.exe path from <GccPath>.");
             puts("\nDefault:\n  Disable Debug Mode.Do not Reserve .asm and .obj File.Place the output into the same "
                  "folder of <SourceFile>");
-            printf("\nSee https://github.com/Delta-in-hub/complierTeam for more information\n");
+            printf("\nSee https://github.com/Delta-in-hub/C-- for more information\n");
             exit(1);
         }
         else
