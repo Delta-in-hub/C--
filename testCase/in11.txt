@@ -1,7 +1,7 @@
 int a = 10;
 int b = 2*a+10;
 char *str = "Hello\tWorld!\n";
-
+int c[10];
 void puts(char *str)
 {
     ;
@@ -42,7 +42,7 @@ int main()
         puts(str);
     }
     fun1();
-    if(a == b + 1)
+    if(a == b )
     {
         puts("A equals to B\n");
     }
