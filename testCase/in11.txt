@@ -42,7 +42,7 @@ int main()
         puts(str);
     }
     fun1();
-    if(a == b)
+    if(a == b + 1)
     {
         puts("A equals to B\n");
     }
