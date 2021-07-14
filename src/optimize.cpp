@@ -341,7 +341,7 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
         auto&& c1 = constantCalculate(node->lhs, inInitliza);
         if (get<0>(c1))
         {
-            double a, b;
+            double a;
             if (node->lhs->type == ND_DNUM)
                 a = get<2>(c1);
             else
@@ -356,7 +356,7 @@ std::tuple<bool, int, double> constantCalculate(Node* node, bool inInitliza = tr
         auto&& c1 = constantCalculate(node->lhs, inInitliza);
         if (get<0>(c1))
         {
-            double a, b;
+            double a;
             if (node->lhs->type == ND_DNUM)
                 a = get<2>(c1);
             else

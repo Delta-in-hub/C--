@@ -48,9 +48,9 @@ void expect(const std::string& tokentype, const std::string& error = "Universal 
 
     if (debugMode)
     {
-        if (not(pos >= 0 and pos < tokenArr.size()))
+        if (not(pos >= 0 and pos < int(tokenArr.size())))
         {
-            std::printf("%d out of range of TokenArr");
+            std::printf("%d out of range of TokenArr", pos);
             getchar();
             exit(1);
         }
@@ -81,9 +81,9 @@ bool consume(const std::string& tokentype)
 {
     if (debugMode)
     {
-        if (not(pos >= 0 and pos < tokenArr.size()))
+        if (not(pos >= 0 and pos < int(tokenArr.size())))
         {
-            std::printf("%d out of range of TokenArr");
+            std::printf("%d out of range of TokenArr", pos);
             getchar();
             exit(1);
         }
@@ -105,9 +105,9 @@ Token& nowToken(int p = 0)
 {
     if (debugMode)
     {
-        if (not(pos + p >= 0 and pos + p < tokenArr.size()))
+        if (not(pos + p >= 0 and pos + p < int(tokenArr.size())))
         {
-            std::printf("%d out of range of TokenArr");
+            std::printf("%d out of range of TokenArr", pos);
             getchar();
             exit(1);
         }
@@ -967,7 +967,7 @@ void declaration(std::vector<Var*>* arr, bool flag)
     auto be = arr->size();
     declarator_list(arr);
     expect(";");
-    for (be; be != arr->size(); be++)
+    for (; be != arr->size(); be++)
     {
         auto&& i = (*arr)[be];
         if (i->isArray)

@@ -215,7 +215,7 @@ void scan(const char* buf)
         else
         {
             int j = i;
-            while (isdigit(s[j]) or isalpha(s[j]) or s[j] == '_' and j <= len - 1)
+            while ((isdigit(s[j]) or isalpha(s[j]) or s[j] == '_') and j <= len - 1)
             {
                 j++;
             }

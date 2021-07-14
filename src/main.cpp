@@ -47,7 +47,7 @@ void outPutParse(bool flag = false)
     for (auto&& i : prog->funcs)
     {
         printf("%s returnType: %d \n", i->name.c_str(), i->returnType->ty);
-        printf("It has %d params and function's address is %p\n", i->params->size(), i->compound);
+        printf("It has %lld params and function's address is %p\n", i->params->size(), i->compound);
     }
     cout << endl;
 }

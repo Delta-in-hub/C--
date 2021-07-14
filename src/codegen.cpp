@@ -888,9 +888,9 @@ void codeGen(char* path)
             emit("\t" + i + "\n");
         }
     }
-    for (int j = 0; j < codes.size(); j++)
+    for (size_t j = 0; j < codes.size(); j++)
     {
-        if (j == p)
+        if (int(j) == p)
             continue;
         for (auto&& i : codes[j])
         {

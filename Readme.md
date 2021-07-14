@@ -14,8 +14,8 @@ A simple C-like grammar complier,Generate executable files of windows x86_64 com
 3. Set them to Environment variable.Or use`c--.exe` `-n <path>` `-g <path>` to set when it running.
 
 ## Build
-1. `cd src/ && g++ *.cpp -ofast -o c--.exe`
-2. Or Double click `complierTeam.sln` and then ...
+1. `cd src/ && g++ *.cpp -std=c++17 -Wall -ofast -o c--.exe`
+2. Or Double click `C--.sln` and then ...
 
 ## Example
 ```
