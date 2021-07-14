@@ -3,7 +3,8 @@
 
 #include "optimize.h"
 
-void codeGen();
+extern std::string asmFilePath;
 
+void codeGen();
 
 #endif

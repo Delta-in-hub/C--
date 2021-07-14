@@ -4,6 +4,7 @@ using namespace std;
 // extern Program* prog;
 // extern Env *env, *global;
 // extern std::unordered_map<Var*, std::pair<int, double>> varInitVal;
+std::string asmFilePath{};
 
 FILE* outasm = nullptr;
 void fileInit()
@@ -20,6 +21,7 @@ void fileInit()
         }
     }
     auto substr = outputPath.substr(0, pos + 1);
+    asmFilePath = substr;
     substr += "asm";
     fopen_s(&outasm, substr.c_str(), "w");
     if (outasm == nullptr)

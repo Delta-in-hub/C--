@@ -3,6 +3,7 @@
 #include "parse.h"
 #include "stdafx.h"
 #include "token.h"
+#include "util.h"
 #include <iostream>
 #include <string>
 using namespace std;
@@ -82,6 +83,7 @@ int main(int argc, char** argv)
     optimize();
     // getchar();
     cout << endl << endl << "CODE GEN " << endl;
-    codeGen();
+    codeGen(); //.asm file done
+    asmToExe();
     return 0;
 }
