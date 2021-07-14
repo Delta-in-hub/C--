@@ -11,7 +11,7 @@ A simple C-like grammar complier,Generate executable files of windows x86_64 com
 2. gcc
    1. I recommend https://jmeubank.github.io/tdm-gcc/
    2. Or any gcc base on MinGW-w64
-3. Set them to Environment variable.Or use`c--.exe` `-n <path>` `-g <path>` to set when it running.
+3. Add them to Environment variable.Or use`c--.exe` `-n <path>` `-g <path>` to set them as arguments.
 
 ## Build
 1. `cd src/ && g++ *.cpp -std=c++17 -Wall -ofast -o c--.exe`
