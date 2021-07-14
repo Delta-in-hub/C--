@@ -1,0 +1,8 @@
+int main()
+{
+    int i;
+    int m = 2;
+    for(i = 0 ; i <m;i++)
+    
+    return 0;
+}

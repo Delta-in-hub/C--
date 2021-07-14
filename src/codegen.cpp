@@ -67,10 +67,12 @@ pair<int, string> tySize(Type* t)
         return {4, "DWORD"};
         break;
     case DOUBLE:
-    case PTR:    //待处理
-    case ARY:    //待处理 arr :   times 10 db 2
+    case PTR: //待处理
+        return {t->size, "QWORD"};
+    case ARY: //待处理 arr :   times 10 db 2
+        return {t->size, "DWORD"};
     case STRUCT: //待处理
-        return {8, "QWORD "};
+        return {t->size, "QWORD "};
         break;
     default:
         break;
@@ -342,15 +344,20 @@ Operation genStatement(Node* i, vector<string>& code)
     }
     case ND_DEREF: {
         auto&& r = getReg();
-        code.push_back("push\teax");
-        code.push_back("mov\teax,[rel " + i->lhs->name + "]");
-        code.push_back("mov\t" + r + ",[eax]");
-        code.push_back("pop\teax");
+        if (r == "ebx")
+            r = getReg();
+        code.push_back("push\trbx");
+        code.push_back("mov\trbx,[rel " + i->lhs->name + "]");
+        code.push_back("mov\t" + r + ",[ebx]");
+        code.push_back("pop\trbx");
         return {"VAR", r, ""};
     }
     case ND_ARRDEREF: {
-        auto&& res    = genStatement(i->expresson, code);
-        string addres = "DWORD [rel " + i->name + res.lhs + "]";
+        auto&& res = genStatement(i->expresson, code);
+        auto r     = getReg();
+        code.push_back("mov\t" + r + "," + res.lhs);
+        code.push_back("shl\t" + r + ",2"); // r*4  only for int
+        string addres = "DWORD [rel " + i->name + "+" + r + "]";
         return {"VAR", addres, ""};
     }
     case ND_NUM:
@@ -425,15 +432,17 @@ Operation genStatement(Node* i, vector<string>& code)
     case ND_MUL: {
         auto&& res1 = genStatement(i->lhs, code);
         auto&& res2 = genStatement(i->rhs, code);
-        code.push_back("push rax");
-        code.push_back("push rdx");
-        code.push_back("mov\teax," + res1.lhs);
-        code.push_back("imul\t" + res2.lhs);
-        auto reg = getReg();
-        code.push_back("mov\t" + reg + ",eax");
-        code.push_back("pop\trdx");
-        code.push_back("pop\trax");
-        return {"MUL", reg, ""};
+        // code.push_back("push rax");
+        // code.push_back("push rdx");
+        // code.push_back("mov\teax," + res1.lhs);
+        // code.push_back("imul\t" + res2.lhs);
+        // code.push_back("mov\t" + reg + ",eax");
+        // code.push_back("pop\trdx");
+        // code.push_back("pop\trax");
+        auto r1 = getReg();
+        code.push_back("mov\t" + r1 + "," + res1.lhs);
+        code.push_back("imul\t" + r1 + "," + res2.lhs);
+        return {"MUL", r1, ""};
     }
     case ND_DIV: {
         auto&& res1 = genStatement(i->lhs, code);
@@ -443,24 +452,28 @@ Operation genStatement(Node* i, vector<string>& code)
         code.push_back("mov\tedx,0");
         code.push_back("mov\teax," + res1.lhs);
         code.push_back("idiv\t" + res2.lhs);
-        auto reg = getReg();
-        code.push_back("mov\t" + reg + ",eax");
         code.push_back("pop\trdx");
+        auto reg = getReg();
+        if (reg == "eax")
+            reg = getReg();
+        code.push_back("mov\t" + reg + ",eax");
         code.push_back("pop\trax");
         return {"MUL", reg, ""};
     }
     case ND_MOD: {
         auto&& res1 = genStatement(i->lhs, code);
         auto&& res2 = genStatement(i->rhs, code);
-        code.push_back("push rax");
         code.push_back("push rdx");
+        code.push_back("push rax");
         code.push_back("mov\tedx,0");
         code.push_back("mov\teax," + res1.lhs);
         code.push_back("idiv\t" + res2.lhs);
+        code.push_back("pop\trax");
         auto reg = getReg();
+        if (reg == "edx")
+            reg = getReg();
         code.push_back("mov\t" + reg + ",edx");
         code.push_back("pop\trdx");
-        code.push_back("pop\trax");
         return {"MUL", reg, ""};
     }
     case ND_CALL: {
@@ -516,6 +529,22 @@ Operation genStatement(Node* i, vector<string>& code)
 
         code.push_back("add     rsp, 28h ");
         return {"CALL", beforReg, ""};
+        break;
+    }
+    case ND_ADDR: {
+        auto p = offset.find(i->var->name);
+        if (p == offset.end())
+            return {"&", i->var->name, ""};
+        else
+        {
+            string addres;
+            if (p->second >= 0)
+            {
+                addres = "+";
+            }
+            addres += to_string(p->second);
+            return {"&", "rbp" + addres, ""};
+        }
         break;
     }
     case ND_STR: // wait for
