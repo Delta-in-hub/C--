@@ -6,6 +6,7 @@ using namespace std;
 // extern std::unordered_map<Var*, std::pair<int, double>> varInitVal;
 std::string asmFilePath{};
 
+//文件asm创建
 FILE* outasm = nullptr;
 void fileInit(char* outPath)
 {
@@ -34,18 +35,18 @@ void fileInit(char* outPath)
         exit(1);
     }
 }
-
+//关文件
 void fileClose()
 {
     if (outasm)
         fclose(outasm);
 }
-
+//输出到文件
 void emit(const std::string& str)
 {
     fprintf(outasm, str.c_str());
 }
-
+//字符串输出文件
 unordered_map<string, string> stringLabel;
 string emitString(const string& str)
 {
@@ -73,11 +74,11 @@ pair<int, string> tySize(Type* t)
         return {4, "DWORD"};
         break;
     case DOUBLE:
-    case PTR: //待处理
+    case PTR: 
         return {t->size, "QWORD"};
-    case ARY: //待处理 arr :   times 10 db 2
+    case ARY: //arr :   times 10 db 2
         return {t->size, "DWORD"};
-    case STRUCT: //待处理
+    case STRUCT: 
         return {t->size, "QWORD "};
         break;
     default:
@@ -86,6 +87,8 @@ pair<int, string> tySize(Type* t)
     return {4, "DWORD"};
 }
 
+
+//寄存器
 queue<string> regQueue;
 unordered_set<string> allReg;
 void initRegQueue()
@@ -135,10 +138,12 @@ void to64bits(string& a)
 {
     if (allReg.find(a) != allReg.end())
     {
+        //eax->rax
         if (a[0] == 'e')
             a[0] = 'r';
         else if (a.back() == 'd')
         {
+            //r8d
             a.back() = ' ';
         }
         return;
@@ -146,6 +151,7 @@ void to64bits(string& a)
     auto p = a.find("DWORD");
     if (p != string::npos)
     {
+        //
         a[p] = 'Q';
     }
     return;
@@ -717,12 +723,14 @@ myputs:
         ret
 .mainend:
 */
+
+
 vector<string> genFunction(Function* f)
 {
     initRegQueue();
     offset.clear();
     auto&& arr = *(f->paraName);
-    int off    = 0x10; // Return address -> 8h     rbp -> 8h   (bytes)
+    int off    = 0x10; // Return address -> 8h     rbp -> 8h   (bytes) 局部变量的寻址
     for (int i = arr.size() - 1; i >= 0; i--)
     {
         offset[arr[i]] = off;
@@ -775,7 +783,7 @@ void codeGen(char* path)
             else
                 emit("\tdq " + to_string(i->data->dval));
             break;
-        case PTR: //待处理
+        case PTR: 
             if (i->data == nullptr)
                 emit("\tdq 0");
             else
@@ -822,7 +830,7 @@ void codeGen(char* path)
                 }
             }
             break;
-        case ARY: //待处理 arr :   times 10 db 2
+        case ARY: //arr :   times 10 db 2
         {
             emit("\ttimes " + to_string(i->arrLen) + " ");
             switch (i->ty->ary_of->ty)
@@ -839,9 +847,9 @@ void codeGen(char* path)
                 emit("dd 0");
                 break;
             case DOUBLE:
-            case PTR:    //待处理
-            case ARY:    //待处理 arr :   times 10 db 2
-            case STRUCT: //待处理
+            case PTR:    //k
+            case ARY:    // arr :   times 10 db 2
+            case STRUCT: //
                 emit("dq 0");
                 break;
             default:
