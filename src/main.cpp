@@ -76,14 +76,15 @@ int main(int argc, char** argv)
         }
         else if (strcmp(arg, "-h") == 0)
         {
-            puts("Usage: c--.exe [-d] [-s] [-c] <SourceFile> [-o <TargetFile>] [-n <NasmPath>] [-g <GccPath>]");
+            puts("Usage: c--.exe [-v] [-d] [-s] [-c] <SourceFile> [-o <TargetFile>] [-n <NasmPath>] [-g <GccPath>]");
             puts("");
+            puts("  -v                       Display compiler version information.");
             puts("  -d                       Enable Debug Mode.");
             puts("  -s                       Reserve Assemble File.");
             puts("  -c                       Reserve Object File.");
             puts("  -o <TargetFile>          Place the output into <TargetFile>.");
             puts("  -n <NasmPath>            Set nasm.exe path from <NasmPath>.");
-            puts("  -g <GccPath>            Set gcc.exe path from <GccPath>.");
+            puts("  -g <GccPath>             Set gcc.exe path from <GccPath>.");
             puts("\nDefault:\n  Disable Debug Mode.Do not Reserve .asm and .obj File.Place the output into the same "
                  "folder of <SourceFile>");
             printf("\nSee https://github.com/Delta-in-hub/complierTeam for more information\n");
