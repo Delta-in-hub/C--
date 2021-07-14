@@ -354,13 +354,9 @@ Operation genStatement(Node* i, vector<string>& code)
     }
     case ND_DEREF: {
         auto&& r = getReg();
-        if (r == "ebx")
-            r = getReg();
-        code.push_back("push\trbx");
-        code.push_back("mov\trbx,[rel " + i->lhs->name + "]");
-        code.push_back("mov\t" + r + ",[ebx]");
-        code.push_back("pop\trbx");
-        return {"VAR", r, ""};
+        code.push_back("mov\t" + r + "," + "[rel " + i->lhs->name + "]");
+        // code.push_back("mov\t" + r + ",[ebx]");
+        return {"VAR", "DWORD [" + r + "]", ""};
     }
     case ND_ARRDEREF: {
         auto&& res = genStatement(i->expresson, code);
@@ -594,9 +590,9 @@ Operation genStatement(Node* i, vector<string>& code)
         break;
     }
     case ND_ADDR: {
-        auto p = offset.find(i->var->name);
+        auto p = offset.find(i->lhs->name);
         if (p == offset.end())
-            return {"&", i->var->name, ""};
+            return {"&", i->lhs->name, ""};
         else
         {
             string addres;

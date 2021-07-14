@@ -1,0 +1,21 @@
+int arr[10];
+int a = 12;
+int *p;
+
+void puts(char* str)
+{
+    ;
+}
+
+int main()
+{
+    arr[0] = 10;
+    arr[1] = 10;
+    p = &a;
+    *p = 20;
+    if(a == arr[0] + arr[1])
+    {
+        puts("a == 10");
+    }
+    return 0;
+}
