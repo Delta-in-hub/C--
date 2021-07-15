@@ -12,6 +12,8 @@ int fun(int a)
     return a + 10;
 }
 
+
+
 int main()
 {
     int i;

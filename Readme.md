@@ -1,25 +1,25 @@
 # C--
-A simple C-like grammar complier,Generate executable files of windows x86_64 computer.
+A simple C-like grammar complier,Generate executable files for windows x86_64 platform.
+
+
+C-- Generate assembly file and then `nasm -fwin64 <file.asm> && gcc <file.obj> -o <file.exe>`
 
 ## Requirement
 1. nasm
    1. Download it from https://www.nasm.us/
-   2. [NASM Tutorial](https://cs.lmu.edu/~ray/notes/nasmtutorial/)
-      1. Using NASM on Windows. Weird shadow space before each call.
-   3. [x86_64 NASM Assembly Quick Reference ("Cheat Sheet")](https://www.cs.uaf.edu/2017/fall/cs301/reference/x86_64.html)
-   4. [x86 and amd64 instruction reference](https://www.felixcloutier.com/x86/index.html)
 2. gcc
    1. I recommend https://jmeubank.github.io/tdm-gcc/
-   2. Or any gcc base on MinGW-w64
-3. Add them to Environment variable.Or use`c--.exe` `-n <path>` `-g <path>` to set them as arguments.
+   2. Or any gcc base on **MinGW-w64**
+3. Add them to Environment variable.Or use`c--.exe` `-n <path>` `-g <path>` to set them as argument.
 
 ## Build
 1. `cd src/ && g++ *.cpp -std=c++17 -Wall -ofast -o c--.exe`
 2. Or Double click `C--.sln` and then ...
 
+
 ## Example
 ```
->> ./c--.exe
+>> ./c--.exe -h
 Usage: c--.exe [-v] [-d] [-s] [-c] <SourceFile> [-o <TargetFile>] [-n <NasmPath>] [-g <GccPath>]
 
   -v                       Display compiler version information.
@@ -35,155 +35,81 @@ Default:
 
 See https://github.com/Delta-in-hub/complierTeam for more information
 
->> cat ./testCase/in11.txt
-int a = 10;
-int b = 2*a+10;
-char *str = "Hello\tWorld!\n";
+>> ./c--.exe -s ./testCase/in12.txt -o test.exe
+>> ./test.exe
+a == 10
+While Looping
+While Looping
+While Looping
+While Looping
+For Looping
+For Looping
+For Looping
+For Looping
+For Looping
 
-void puts(char *str)
+>> cat test.asm
+
+section .data
+arr :
+	times 10 dd 0
+a :
+	dd 12
+
+......
+
+>> cat ./testCase/in12.txt
+
+int arr[10];
+int a = 12;
+int *p;
+
+void puts(char* str)
 {
-    ;
+    /* Reserved Function. Link it to C library later. C:\WINDOWS\System32\msvcrt.dll */
 }
-
-void getchar()
+int getchar()
 {
-    ;
-}
-
-void fun()
-{
-    int c;
-    int d;
-    d;
-    c;
-    if(1 < 2)
-    {
-        ;
-    }
-    else
-    {
-        ;
-    }
-}
-
-void fun1()
-{
-    a=30;
+    /* Reserved Function. Link it to C library later. C:\WINDOWS\System32\msvcrt.dll */
 }
 
 int main()
 {
-    int i;
-    int m = 2;
-    for(i = 0 ; i < m ;i++)
+    arr[0] = 1+1+1+1+1+2+2+1;
+    arr[1] = 10 - 10 + 20 - 2 * 10 + arr[0];
+    p = &a;
+    *p = 20;
+    if(a == arr[0] + arr[1])
     {
-        puts(str);
+        puts("a == 10");
     }
-    fun1();
-    if(a == b + 1)
+    while(a <= 23)
     {
-        puts("A equals to B\n");
+        puts("While Looping");
+        a++;
+    }
+    for(a = 5; a != 0; a-- )
+    {
+        puts("For Looping");
     }
     getchar();
     return 0;
 }
 
->> ./c--.exe -d -s -c ./testCase/in11.txt -o test.exe
-
-./testCase/in11.txt
-
-TK_INT int
-TK_IDENT a
-TK_= =
-TK_INUM 10 10 0
-TK_; ;
-TK_INT int
-TK_IDENT b
-TK_= =
-TK_INUM 2 2 0
-TK_* *
-TK_IDENT a
-TK_+ +
-TK_INUM 10 10 0
-...
-...
-TK_} }
-TK_EOF
-
-
-Complier done
-
-Global Variable
-a sizeof 4 VarType: 3
-b sizeof 4 VarType: 3
-str sizeof 8 VarType: 5
-
-Function
-puts returnType: 0
-It has 1 params and function's address is 0000000000ea35d0
-getchar returnType: 0
-It has 0 params and function's address is 0000000000ea38d0
-fun returnType: 0
-It has 0 params and function's address is 0000000000ea3bc0
-fun1 returnType: 0
-It has 0 params and function's address is 0000000000e98b40
-main returnType: 3
-It has 0 params and function's address is 0000000000e98e40
-
-m 2 0
-b 30 30
-a 10 0
-
->> ./test.exe
-Hello   World!
-
-Hello   World!
-
 ```
 
-## 须知
+## Notice
 
-### 命名规范
-
-#### 函数/变量命名
-
-小驼峰命名
-
-`getNextToken()`
-
-#### 类命名方式
-
-大驼峰命名
-
-`GetNextToken()`
-
-## code format
-
-vs里打开启用clang format
-## 其他
-
-在`*.h`中写函数声明,在`*.cpp`中写函数实现
-
-## 文法
-
-[见此文件](./Grammar Zoo - Browsable C99 Grammar.pdf)
-
-这个文法存在左递归
-
-```
-declaration-list ::=
-	declaration
-	declaration-list declaration
-
-declaration-list ::= (declaration)+ 正闭包
-```
+C-- did basically a complete front-end, including syntax/semantic analysis.But in back-end,we didn't do much work on code optimization.
+In object code generation,C-- don't support struct member access and treat all types as
+`int32_t` when you referencing variables.
 
 
 
----
+## Reference
 
-https://github.com/rui314/9cc
-
-https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/index.html
-
----
+1. https://github.com/rui314/9cc     I learnd a lot from 9cc.Thanks so much.
+2. [NASM Tutorial](https://cs.lmu.edu/~ray/notes/nasmtutorial/)
+      1. Using NASM on Windows. Weird shadow space before each call.
+3. [x86_64 NASM Assembly Quick Reference ("Cheat Sheet")](https://www.cs.uaf.edu/2017/fall/cs301/reference/x86_64.html)
+4. [x86 and amd64 instruction reference](https://www.felixcloutier.com/x86/index.html)
