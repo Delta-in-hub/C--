@@ -33,7 +33,7 @@ Usage: c--.exe [-v] [-d] [-s] [-c] <SourceFile> [-o <TargetFile>] [-n <NasmPath>
 Default:
   Disable Debug Mode.Do not Reserve .asm and .obj File.Place the output into the same folder of <SourceFile>
 
-See https://github.com/Delta-in-hub/complierTeam for more information
+See https://github.com/Delta-in-hub/C-- for more information
 
 >> ./c--.exe -s ./testCase/in12.txt -o test.exe
 >> ./test.exe
