@@ -104,6 +104,9 @@ C-- did basically a complete front-end, including syntax/semantic analysis.But i
 In object code generation,C-- don't support struct member access and treat all types as
 `int32_t` when you referencing variables.
 
+A bit like c89,C-- requires all variables to be declared at the beginning of a function.
+
+Function`puts(char*)` and `getchar()` are both reserved.They will be linked to C library.
 
 
 ## Reference
